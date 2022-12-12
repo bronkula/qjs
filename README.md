@@ -10,6 +10,14 @@ But here we are. This library is small, and meant for me. I made it for myself, 
 
 Who needs this library? Anyone who likes to make websites on an old AMP stack, and hates having to compile a website. If you like making websites, but wish you could just make code and upload it, this might be for you.
 
+### Current Release
+
+**v 1.0.0**
+
+- [query](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.0/dist/query.min.js)
+- [query lite](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.0/dist/query-lite.min.js)
+- [query route](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.0/dist/query-route.min.js)
+
 ---
 
 Created by [Hamilton Cline](https://hdraws.com)
