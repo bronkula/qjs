@@ -1,0 +1,23 @@
+{
+  "name": "qjs",
+  "version": "1.0.0",
+  "description": "A DOM querying library",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lite": "lite-server",
+    "queryfull": "terser ./src/query.js ./src/query-manipulation.js ./src/query-traversal.js ./src/query-fetch.js ./src/query-events.js -o ./dist/query.min.js -c -m reserved=['q','Q','E'] --comments",
+    "querylite": "terser ./src/query.js ./src/query-events.js -o ./dist/query-lite.min.js -c -m reserved=['q','Q','E'] --comments",
+    "queryroute": "terser ./src/query-route.js -o ./dist/query-route.min.js -c -m reserved=['q','Q','E'] --comments",
+    "query": "concurrently \"npm:queryfull\" \"npm:querylite\" \"npm:queryroute\""
+  },
+  "author": "Hamilton Cline",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^7.6.0",
+    "terser": "^5.16.1"
+  },
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
