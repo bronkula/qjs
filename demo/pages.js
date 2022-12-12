@@ -8,6 +8,7 @@ const nav = () => {
             <li><a href="#page/1">Page 1</a></li>
             <li><a href="#page/2">Page 2</a></li>
             <li><a href="#page/blorf">Page Blorf</a></li>
+            <li><a href="#load">Loaded Page</a></li>
             <li><a href="#bad">Error Page</a></li>
         </ul>
     </nav>
@@ -40,6 +41,11 @@ export const ErrorPage = async (error) => {
             `<div>${error}</div>`)
         )
     );
+}
+
+export const LoadedPage = async () => {
+    LoadedPage.htm = LoadedPage.htm ?? await fetch('./loaded.htm').then(d=>d.text());
+    return q(LoadedPage.htm);
 }
 
 export const BadPage = async () => {
