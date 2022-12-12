@@ -1,10 +1,10 @@
-import { BadPage, defaultPage, errorPage, Page } from "./pages.js";
+import { BadPage, DefaultPage, ErrorPage, BasicPage } from "./pages.js";
 
 q.route.init({
     routes:{
-        "page/:route": Page,
+        "page/:route": BasicPage,
         "bad": BadPage,
     },
-    defaultPage: defaultPage,
-    errorPage: errorPage,
+    defaultPage: DefaultPage,
+    errorPage: ErrorPage,
 });

@@ -74,15 +74,19 @@ const setActive = (state,update) => {
 if(w.q) {
     route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
         q(document).on("pageshow",async (event)=>{
-            const makepage = async (page) => {
-                let d = await page();
-                q(selector).html(d);
+            const makepage = async (page,data) => {
+                try {
+                    let d = await page(data);
+                    q(selector).html(d);
+                } catch(e) {
+                    throw(e);
+                }
             }
             try {
                 const route = q.route.make(routes, defaultPage);
                 await makepage(route);
             } catch(e) {
-                makepage(errorPage(e));
+                makepage(errorPage,e);
                 throw("Page failed: "+ e);
             }
         });

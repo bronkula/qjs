@@ -10,27 +10,28 @@ const nav = () => {
     `;
 }
 
-export const defaultPage = async () => {
+export const DefaultPage = async () => {
     return `<div>
         ${nav()}
         This is the default page.
     </div>`;
 }
 
-export const Page = async ({route}) => {
+export const BasicPage = async ({route}) => {
     return `<div>
         ${nav()}
         This is page ${route}.
     </div>`;
 }
 
-export const BadPage = async () => {
-    throw("whoopsie");
-}
-
-export const errorPage = async () => {
+export const ErrorPage = async (error) => {
     return `<div>
         ${nav()}
         This is the error page.
+        <div>${error}</div>
     </div>`;
+}
+
+export const BadPage = async () => {
+    throw("This is a thrown error.");
 }
