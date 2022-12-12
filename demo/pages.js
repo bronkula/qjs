@@ -1,18 +1,15 @@
-import { Card, Container } from "./Elements.js";
+import { Card, Container, Div } from "./Elements.js";
+import { Nav, NavLink } from "./Navs.js";
 
 const nav = () => {
-    return `
-    <nav class="nav">
-        <ul>
-            <li><a href="#/">Main Page</a></li>
-            <li><a href="#page/1">Page 1</a></li>
-            <li><a href="#page/2">Page 2</a></li>
-            <li><a href="#page/blorf">Page Blorf</a></li>
-            <li><a href="#load">Loaded Page</a></li>
-            <li><a href="#bad">Error Page</a></li>
-        </ul>
-    </nav>
-    `;
+    return Nav(
+        NavLink('#/','Main Page'),
+        NavLink('#page/1','Page 1'),
+        NavLink('#page/more','Page More'),
+        NavLink('#page/blorf','Page blorf'),
+        NavLink('#load','Loaded Page'),
+        NavLink('#bad','Error Page'),
+    );
 }
 
 export const DefaultPage = async () => {
@@ -25,7 +22,7 @@ export const DefaultPage = async () => {
 export const BasicPage = async ({route}) => {
     return Container(
         nav(),
-        Card(`This is page that is routed from anything with the 'page' route. It is passed extra information, which in this case was '${route}'.`)
+        Card(`This is a page that is routed from anything with the 'page' route. It is passed extra information, which in this case was '${route}'.`)
     );
 }
 
