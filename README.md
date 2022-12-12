@@ -18,6 +18,10 @@ Who needs this library? Anyone who likes to make websites on an old AMP stack, a
 - [query lite](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.2/dist/query-lite.min.js)
 - [query route](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.2/dist/query-route.min.js)
 
+### Route Demo
+
+- [demo](https://bronkula.github.io/qjs/demo)
+
 ---
 
 Created by [Hamilton Cline](https://hdraws.com)
