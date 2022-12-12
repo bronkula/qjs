@@ -30,19 +30,19 @@ const route = {
     make: (routes,page=()=>{},basis) => {
         let hashroute = (basis?basis:w.location.hash.slice(1));
         let hashsplit = hashroute.split("/");
-        let v={};
+        let props = {};
         if(hashroute != '') {
             for(let [checkroute,fn] of Object.entries(routes)) {
-                v={};
-                if(checkroute==hashroute) { page = fn; break; }
+                props = {};
+                if (checkroute==hashroute) { page = fn; break; }
                 let checksplit = checkroute.split("/");
                 if(checksplit[0]==hashsplit[0] && checksplit.length==hashsplit.length) {
-                    v = route.matches(hashsplit,checksplit);
-                    if(v!==false) { page = fn; break; }
+                    props = route.matches(hashsplit,checksplit);
+                    if (props!==false) { page = fn; break; }
                 }
             }
         }
-        return (d)=>page(v,d);
+        return (data)=>page(props,data);
     },
 };
 
@@ -72,14 +72,18 @@ const setActive = (state,update) => {
 };
 
 if(w.q) {
-    route.define = ({routes = {}, basis = ()=>{}, selector = ".app"}) => {
-        q(document).on("pageshow",async (e)=>{
-            try {
-                const route = q.route.make(routes, basis);
-                let d = await route();
+    route.define = ({routes = {}, defaultPage = ()=>``, errorPage = ()=>`error`, selector = ".app"}) => {
+        q(document).on("pageshow",async (event)=>{
+            const makepage = async (page) => {
+                let d = await page();
                 q(selector).html(d);
+            }
+            try {
+                const route = q.route.make(routes, defaultPage);
+                await makepage(route);
             } catch(e) {
-                throw("Page failed: ", e);
+                makepage(errorPage);
+                throw("Page failed: "+ e);
             }
         });
     };
