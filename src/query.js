@@ -3,9 +3,51 @@
 
 ;((w)=>{
 
+class Q {
+    constructor(s, sc = w.document, debug = false) {
+        let nl =
+            !s || !q.isElement(sc) ? [] :
+            q.isQ(s) ? s.toArray() :
+            q.isElement(s) || s==sc ? [s] :
+            q.isFragment(s) ? q.makeFragment(s) :
+            q.isArray(s) ? q.settle(s) :
+            q.isFunction(s) ? !window.addEventListener('DOMContentLoaded',s) :
+            sc.querySelectorAll(s);
+        if (debug) q.debug(s,sc,nl);
+        if (!nl) return false;
+        Object.assign(this,nl);
+        this.length = nl.length;
+    }
+
+    find(s){ return this.sift(o=>q(s,o)); }
+
+    /* Return only unique, non false, elements */
+    sift(f) { return q(q.sift(this,f)); }
+    pipe(f) { return q(this.map(f)); }
+
+    /* See if any Q elements match a selector */
+    is(s) { return this.some(o=>o.matches(s)); }
+    not(s) { return !this.is(s); }
+
+    toArray() { return this.reduce((r,o)=>r.concat([o]),[]) }
+    toString() { return this.reduce((r,o)=>r+q.isElement(o)?o.outerHTML:`${o}`,'') }
+    toText() { return this.reduce((r,o)=>r+q.isElement(o)?o.innerText:`${o}`,'') }
+}
+
+/* Basic array methods */
+Q.prototype.forEach = Array.prototype.forEach;
+Q.prototype.map = Array.prototype.map;
+Q.prototype.flatMap = Array.prototype.flatMap;
+Q.prototype.reduce = Array.prototype.reduce;
+Q.prototype.some = Array.prototype.some;
+Q.prototype.every = Array.prototype.every;
+Q.prototype.filter = Array.prototype.filter;
+
+
+
+
 
 const q = (s,sc,d) => new Q(s,sc,d);
-
 
 
 q.isElement = d => d instanceof HTMLDocument || d instanceof HTMLElement || d instanceof SVGElement || d instanceof Element;
@@ -37,16 +79,17 @@ q.htmlEncode = function(s) {
 }
 
 
-q.extend = (k,f,o=false) => {
-    q.asArray(k).forEach(k=>{
-        if(!q.hasExtension(k) || o) Q.prototype[k] = f }) }
-q.hasExtension = (k) => {
-    return q.isFunction(Q.prototype[k]); }
+q.extend = (keys, fn, force = false) => {
+    q.asArray(keys).forEach(key=>{
+        if (!q.hasExtension(key) || force) Q.prototype[key] = fn }) }
+q.hasExtension = (key) => {
+    return q.isFunction(Q.prototype[key]); }
 
 
 q.sift = (s,f) => {
     let set = s.toArray().flatMap(f);
     return [...(new Set(set))]; }
+
 q.settle = o => {
     return o.flatMap(e=> !e ? [] :
         q.isFragment(e) ? q.makeFragment(e) :
@@ -69,52 +112,9 @@ q.debug = (s,sc,nl) => {
     console.log("isEntity S",q.isEntity(s));
     console.log("isJson S",q.isJson(s));
     console.log("querySelectorAll S",sc.querySelectorAll(s));
-    console.log("new el",nl);
+    console.log("node list",nl);
     console.groupEnd();
 }
-
-
-class Q {
-    constructor(s,sc=document,debug=false) {
-        let nl =
-            !s || !q.isElement(sc) ? [] :
-            q.isQ(s) ? s.toArray() :
-            q.isElement(s) || s==sc ? [s] :
-            q.isFragment(s) ? q.makeFragment(s) :
-            q.isArray(s) ? q.settle(s) :
-            q.isFunction(s) ? !window.addEventListener('DOMContentLoaded',s) :
-            sc.querySelectorAll(s);
-        if(debug) q.debug(s,sc,nl);
-        if(!nl) return false;
-        Object.assign(this,nl);
-        this.length = nl.length;
-    }
-
-    find(s){ return this.sift(o=>q(s,o)); }
-
-    /* Return only unique, non false, elements */
-    sift(f) { return q(q.sift(this,f)); }
-    pipe(f) { return q(this.map(f)); }
-
-    /* See if any Q elements match a selector */
-    is(s) { return this.some(o=>o.matches(s)); }
-    not(s) { return !this.is(s); }
-
-    toArray() { return this.reduce((r,o)=>r.concat([o]),[]) }
-    toString() { return this.reduce((r,o)=>r+q.isElement(o)?o.outerHTML:`${o}`,'') }
-    toText() { return this.reduce((r,o)=>r+q.isElement(o)?o.innerText:`${o}`,'') }
-}
-
-
-
-/* Basic array methods */
-Q.prototype.forEach = Array.prototype.forEach;
-Q.prototype.map = Array.prototype.map;
-Q.prototype.flatMap = Array.prototype.flatMap;
-Q.prototype.reduce = Array.prototype.reduce;
-Q.prototype.some = Array.prototype.some;
-Q.prototype.every = Array.prototype.every;
-Q.prototype.filter = Array.prototype.filter;
 
 
 

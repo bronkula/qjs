@@ -3,10 +3,6 @@
 
 const stateObj = {};
 
-const checkNextRoute = (checkroute,hashroute) => {
-
-}
-
 const route = {
     navigate : (str,updateUrl=true) => {
         if(str=="back") {
@@ -21,15 +17,15 @@ const route = {
             w.location.assign(stateObj.url);
         }
     },
-    matches:(h,r) => {
-        if(h[0]!=r[0]) return false;
-        let v = {};
-        for(let i in h) {
-            if(h[i]==r[i]) continue;
-            else if(r[i].slice(0,1)==":") v[r[i].slice(1)] = h[i];
-            else if(h[i]!=r[i]) return false;
+    matches: (basis, tocheck) => {
+        if (basis[0] != tocheck[0]) return false;
+        let props = {};
+        for(let i in basis) {
+            if (basis[i] == tocheck[i]) continue;
+            else if (tocheck[i].slice(0,1) == ":") props[tocheck[i].slice(1)] = basis[i];
+            else if (basis[i] != tocheck[i]) return false;
         }
-        return v;
+        return props;
     },
     make: (routes,page=()=>{},basis) => {
         let hashroute = (basis?basis:w.location.hash.slice(1));
@@ -47,12 +43,10 @@ const route = {
             }
         }
         return (d)=>page(v,d);
-    }
+    },
 };
 
 const setActive = (state,update) => {
-
-    // console.log(w.history,state,stateObj);
 
     if(state==null) {
         state = {
@@ -78,12 +72,23 @@ const setActive = (state,update) => {
 };
 
 if(w.q) {
+    route.define = ({routes = {}, basis = ()=>{}, selector = ".app"}) => {
+        q(document).on("pageshow",async (e)=>{
+            try {
+                const route = q.route.make(routes, basis);
+                let d = await route();
+                q(selector).html(d);
+            } catch(e) {
+                throw("Page failed: ", e);
+            }
+        });
+    };
     q(()=>{
-        q(document).delegate("click","a[href^='#']",function(e){
+        q(w.document).delegate("click","a[href^='#']",function(e){
             e.preventDefault();
             let r = this.attributes.href.value.slice(1);
             if(r!="") route.navigate(r);
-        })
+        });
     });
     q.route = route;
 }
@@ -91,9 +96,9 @@ else w.route = route;
 
 
 w.addEventListener("load",()=>{
-    setTimeout(()=>w.addEventListener("popstate",o=>setActive(o.state)),0)
+    setTimeout(()=>w.addEventListener("popstate",o=>setActive(o.state)),0);
 });
-w.addEventListener("DOMContentLoaded",e=>setActive(null))
+w.addEventListener("DOMContentLoaded",e=>setActive(null));
 
 
 })(window);
