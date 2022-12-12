@@ -1,4 +1,4 @@
-import { Card, Container, Page } from "./Elements.js";
+import { Card, Container } from "./Elements.js";
 
 const nav = () => {
     return `
@@ -16,30 +16,24 @@ const nav = () => {
 }
 
 export const DefaultPage = async () => {
-    return Page(
-        Container(
-            nav(),
-            Card("This is the default page.")
-        )
+    return Container(
+        nav(),
+        Card("This is the default page. It is the page if none of your other routes are matched.")
     );
 }
 
 export const BasicPage = async ({route}) => {
-    return Page(
-        Container(
-            nav(),
-            Card(`This is page ${route}.`)
-        )
+    return Container(
+        nav(),
+        Card(`This is page that is routed from anything with the 'page' route. It is passed extra information, which in this case was '${route}'.`)
     );
 }
 
 export const ErrorPage = async (error) => {
-    return Page(
-        Container(
-            nav(),
-            Card("This is the error page.",
-            `<div>${error}</div>`)
-        )
+    return Container(
+        nav(),
+        Card("This is the error page. Errors can be automatically routed to an appropriate design or default page.",
+        `<div>The error thrown was: '${error}'</div>`)
     );
 }
 
@@ -49,5 +43,5 @@ export const LoadedPage = async () => {
 }
 
 export const BadPage = async () => {
-    throw("This is a thrown error.");
+    throw("Something did a bad on this page.");
 }
