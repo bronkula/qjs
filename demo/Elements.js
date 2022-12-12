@@ -29,3 +29,5 @@ export const FlexStretch = Div({class:'flex-stretch'});
 export const FlexNone = Div({class:'flex-none'});
 
 export const Overscroll = Div({class:'overscroll'});
+export const Container = Div({class:'container'});
+export const Card = Div({class:'card soft'});

@@ -1,35 +1,45 @@
+import { Card, Container, Page } from "./Elements.js";
+
 const nav = () => {
     return `
-    <ul>
-        <li><a href="#/">Main Page</a></li>
-        <li><a href="#page/1">Page 1</a></li>
-        <li><a href="#page/2">Page 2</a></li>
-        <li><a href="#page/blorf">Page Blorf</a></li>
-        <li><a href="#bad">Error Page</a></li>
-    </ul>
+    <nav class="nav">
+        <ul>
+            <li><a href="#/">Main Page</a></li>
+            <li><a href="#page/1">Page 1</a></li>
+            <li><a href="#page/2">Page 2</a></li>
+            <li><a href="#page/blorf">Page Blorf</a></li>
+            <li><a href="#bad">Error Page</a></li>
+        </ul>
+    </nav>
     `;
 }
 
 export const DefaultPage = async () => {
-    return `<div>
-        ${nav()}
-        This is the default page.
-    </div>`;
+    return Page(
+        Container(
+            nav(),
+            Card("This is the default page.")
+        )
+    );
 }
 
 export const BasicPage = async ({route}) => {
-    return `<div>
-        ${nav()}
-        This is page ${route}.
-    </div>`;
+    return Page(
+        Container(
+            nav(),
+            Card(`This is page ${route}.`)
+        )
+    );
 }
 
 export const ErrorPage = async (error) => {
-    return `<div>
-        ${nav()}
-        This is the error page.
-        <div>${error}</div>
-    </div>`;
+    return Page(
+        Container(
+            nav(),
+            Card("This is the error page.",
+            `<div>${error}</div>`)
+        )
+    );
 }
 
 export const BadPage = async () => {
