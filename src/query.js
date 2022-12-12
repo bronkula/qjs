@@ -46,7 +46,6 @@ q.hasExtension = (k) => {
 
 q.sift = (s,f) => {
     let set = s.toArray().flatMap(f);
-    //let fset = set.filter(o=>o);
     return [...(new Set(set))]; }
 q.settle = o => {
     return o.flatMap(e=> !e ? [] :
