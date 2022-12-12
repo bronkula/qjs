@@ -72,7 +72,7 @@ const setActive = (state,update) => {
 };
 
 if(w.q) {
-    route.init = ({routes = {}, defaultPage = ()=>``, errorPage = ()=>`error`, selector = ".app"}) => {
+    route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
         q(document).on("pageshow",async (event)=>{
             const makepage = async (page) => {
                 let d = await page();
@@ -82,7 +82,7 @@ if(w.q) {
                 const route = q.route.make(routes, defaultPage);
                 await makepage(route);
             } catch(e) {
-                makepage(errorPage);
+                makepage(errorPage(e));
                 throw("Page failed: "+ e);
             }
         });
