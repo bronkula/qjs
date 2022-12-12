@@ -1,6 +1,6 @@
 import { BadPage, defaultPage, errorPage, Page } from "./pages.js";
 
-q.route.define({
+q.route.init({
     routes:{
         "page/:route": Page,
         "bad": BadPage,
