@@ -7,11 +7,3 @@ export const NavButton = (check) => (link,name,events={}) =>
    NavLi(link, check) ( El('button', {type:'button'}) ({href:link}, events) (name) );
 
 export const Nav = (...ch) => Div({class:'nav'})(Ul()(...ch));
-
-export const CoreNav = () => {
-   return Nav(
-      NavLink('#recent','Recent'),
-      NavLink('#list','List'),
-      NavLink('#profile','Profile')
-   )
-}

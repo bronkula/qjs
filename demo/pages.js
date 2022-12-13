@@ -1,4 +1,4 @@
-import { Card, Container, Div } from "./Elements.js";
+import { Card, Container } from "./Elements.js";
 import { Nav, NavLink } from "./Navs.js";
 
 const nav = () => {
