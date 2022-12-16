@@ -12,7 +12,7 @@ const nav = () => {
     );
 }
 
-export const DefaultPage = async () => {
+export const MainPage = async () => {
     return Container(
         nav(),
         Card("This is the default page. It is the page if none of your other routes are matched.")
@@ -35,7 +35,7 @@ export const ErrorPage = async (error) => {
 }
 
 export const LoadedPage = async () => {
-    LoadedPage.htm = LoadedPage.htm ?? await fetch('./loaded.htm').then(d=>d.text());
+    LoadedPage.htm = LoadedPage.htm ?? await fetch('./demo/loaded.htm').then(d=>d.text());
     return q(LoadedPage.htm);
 }
 

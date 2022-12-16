@@ -1,4 +1,4 @@
-import { BadPage, DefaultPage, ErrorPage, BasicPage, LoadedPage } from "./pages.js";
+import { BadPage, MainPage, ErrorPage, BasicPage, LoadedPage } from "./pages.js";
 
 q.route.init({
     routes:{
@@ -6,6 +6,6 @@ q.route.init({
         "load": LoadedPage,
         "bad": BadPage,
     },
-    defaultPage: DefaultPage,
+    defaultPage: MainPage,
     errorPage: ErrorPage,
 });

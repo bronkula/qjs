@@ -20,7 +20,7 @@ Who needs this library? Anyone who likes to make websites on an old AMP stack, a
 
 ### Route Demo
 
-- [demo](https://bronkula.github.io/qjs/demo)
+- [demo](https://bronkula.github.io/qjs/)
 
 ---
 

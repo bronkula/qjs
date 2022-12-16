@@ -1,5 +1,7 @@
 ;((w)=>{
 
+let root = '/';
+let style = 'hash';
 
 const stateObj = {};
 
@@ -11,7 +13,10 @@ const route = {
         else if (w.history.pushState) {
             setActive({
                 title: str,
-                url: w.location.origin + w.location.pathname + "#" + str
+                url: style ===
+                    'hash' ? w.location.origin + w.location.pathname + "#" + str :
+                    'browser' ? w.location.origin + root + str :
+                    ''
             },updateUrl);
         } else {
             w.location.assign(stateObj.url);
@@ -28,7 +33,10 @@ const route = {
         return props;
     },
     make: (routes,page=()=>{},basis) => {
-        let hashroute = (basis?basis:w.location.hash.slice(1));
+        let hashroute = 
+            style === 'browser' ? w.location.pathname.slice(root.length) :
+            style === 'hash' ? basis ? basis : w.location.hash.slice(1) :
+            '';
         let hashsplit = hashroute.split("/");
         let props = {};
         if(hashroute != '') {
@@ -50,7 +58,10 @@ const setActive = (state,update) => {
 
     if(state==null) {
         state = {
-            title:w.location.hash.slice(1),
+            title: 
+                style === 'hash' ? w.location.hash.slice(1) :
+                style === 'browser' ? w.location.pathname.slice(root.length) :
+                '',
             url:w.location.href
         };
     }
@@ -92,10 +103,17 @@ if(w.q) {
         });
     };
     q(()=>{
-        q(w.document).delegate("click","a[href^='#']",function(e){
-            e.preventDefault();
-            let r = this.attributes.href.value.slice(1);
-            if(r!="") route.navigate(r);
+        q(w.document).delegate("click","a",function(e){
+            if (style === 'hash' && this.href[0] === '#') {
+                e.preventDefault();
+                let r = this.attributes.href.value.slice(1);
+                if(r!="") route.navigate(r);
+            } else
+            if (style === 'browser' && this.dataset.role === 'link') {
+                e.preventDefault();
+                let r = this.attributes.href;
+                if(r !== "") route.navigate(r);
+            }
         });
     });
     q.route = route;
@@ -106,7 +124,7 @@ else w.route = route;
 w.addEventListener("load",()=>{
     setTimeout(()=>w.addEventListener("popstate",o=>setActive(o.state)),0);
 });
-w.addEventListener("DOMContentLoaded",e=>setActive(null));
+w.addEventListener("DOMContentLoaded",e=>{setActive(null);});
 
 
 })(window);
