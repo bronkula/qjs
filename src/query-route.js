@@ -1,11 +1,10 @@
 ;((w)=>{
 
-let root = '/';
-let style = 'hash';
-
 const stateObj = {};
 
 const route = {
+    root : '/',
+    style : 'hash',
     navigate : (str,updateUrl=true) => {
         if(str=="back") {
             if(w.history.state != null) w.history.back();
@@ -13,9 +12,9 @@ const route = {
         else if (w.history.pushState) {
             setActive({
                 title: str,
-                url: style ===
+                url: route.style ===
                     'hash' ? w.location.origin + w.location.pathname + "#" + str :
-                    'browser' ? w.location.origin + root + str :
+                    'browser' ? w.location.origin + (str !== route.root ? route.root : '') + str :
                     ''
             },updateUrl);
         } else {
@@ -34,8 +33,8 @@ const route = {
     },
     make: (routes,page=()=>{},basis) => {
         let hashroute = 
-            style === 'browser' ? w.location.pathname.slice(root.length) :
-            style === 'hash' ? basis ? basis : w.location.hash.slice(1) :
+            route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
+            route.style === 'hash' ? basis ? basis : w.location.hash.slice(1) :
             '';
         let hashsplit = hashroute.split("/");
         let props = {};
@@ -59,8 +58,8 @@ const setActive = (state,update) => {
     if(state==null) {
         state = {
             title: 
-                style === 'hash' ? w.location.hash.slice(1) :
-                style === 'browser' ? w.location.pathname.slice(root.length) :
+                route.style === 'hash' ? w.location.hash.slice(1) :
+                route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
                 '',
             url:w.location.href
         };
@@ -82,9 +81,9 @@ const setActive = (state,update) => {
 
 };
 
-if(w.q) {
+if(w.q && w.document) {
     route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
-        q(document).on("pageshow",async (event)=>{
+        q(w.document).on("pageshow",async (event)=>{
             const makepage = async (page,data) => {
                 try {
                     let d = await page(data);
@@ -104,16 +103,22 @@ if(w.q) {
     };
     q(()=>{
         q(w.document).delegate("click","a",function(e){
-            if (style === 'hash' && this.href[0] === '#') {
+            console.log({route,data:this.dataset.role})
+            if (route.style === 'hash' && this.href[0] === '#') {
                 e.preventDefault();
                 let r = this.attributes.href.value.slice(1);
-                if(r!="") route.navigate(r);
+                if(r !== "") route.navigate(r);
             } else
-            if (style === 'browser' && this.dataset.role === 'link') {
+            if (route.style === 'browser' && this.dataset.role === 'link') {
                 e.preventDefault();
                 let r = this.attributes.href;
-                if(r !== "") route.navigate(r);
+                if(r !== "") route.navigate(r.value);
+            } else
+            if (route.style === 'browser' && this.dataset.rel === 'back') {
+                e.preventDefault();
+                route.navigate('back');
             }
+            e.preventDefault();
         });
     });
     q.route = route;
