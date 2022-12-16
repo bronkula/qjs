@@ -12,9 +12,8 @@ const route = {
         else if (w.history.pushState) {
             setActive({
                 title: str,
-                url: route.style ===
-                    'hash' ? w.location.origin + w.location.pathname + "#" + str :
-                    'browser' ? w.location.origin + (str !== route.root ? route.root : '') + str :
+                url: route.style === 'hash' ? w.location.origin + w.location.pathname + "#" + str :
+                    route.style === 'browser' ? w.location.origin + route.root + (str !== route.root ? str : '') :
                     ''
             },updateUrl);
         } else {
@@ -31,11 +30,14 @@ const route = {
         }
         return props;
     },
-    make: (routes,page=()=>{},basis) => {
-        let hashroute = 
+    getroot: (basis) => {
+        return basis ?? 
             route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
-            route.style === 'hash' ? basis ? basis : w.location.hash.slice(1) :
+            route.style === 'hash' ? w.location.hash.slice(1) :
             '';
+    },
+    make: (routes,page=()=>{},basis) => {
+        let hashroute = route.getroot(basis);
         let hashsplit = hashroute.split("/");
         let props = {};
         if(hashroute != '') {
@@ -82,28 +84,34 @@ const setActive = (state,update) => {
 };
 
 if(w.q && w.document) {
+    route.makepage = async ({page,data,selector=''}) => {
+        try {
+            let d = await page(data);
+            q(selector).html(d);
+        } catch(e) {
+            throw(e);
+        }
+    },
     route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
         q(w.document).on("pageshow",async (event)=>{
-            const makepage = async (page,data) => {
-                try {
-                    let d = await page(data);
-                    q(selector).html(d);
-                } catch(e) {
-                    throw(e);
-                }
-            }
             try {
-                const route = q.route.make(routes, defaultPage);
-                await makepage(route);
+                const page = route.make(routes, defaultPage);
+                await route.makepage({
+                    page,
+                    selector,
+                });
             } catch(e) {
-                makepage(errorPage,e);
+                route.makepage({
+                    page: errorPage,
+                    selector,
+                    data: e
+                });
                 throw("Page failed: "+ e);
             }
         });
     };
     q(()=>{
         q(w.document).delegate("click","a",function(e){
-            console.log({route,data:this.dataset.role})
             if (route.style === 'hash' && this.href[0] === '#') {
                 e.preventDefault();
                 let r = this.attributes.href.value.slice(1);

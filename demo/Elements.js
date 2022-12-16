@@ -1,7 +1,10 @@
 
 export const El = (type='div',attr1={}) => (attr2={}) => (...children) => {
     El.e = q(`<${type}>`);
-    El.e.attr({...attr1,...attr2});
+    El.e.attr({
+        ...attr1,
+        ...attr2,
+    });
     El.e.html(...children);
     return El.e;
 }

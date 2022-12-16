@@ -15,7 +15,10 @@ const nav = () => {
 export const MainPage = async () => {
     return Container(
         nav(),
-        Card("This is the default page. It is the page if none of your other routes are matched.")
+        Card(`
+            <p>This is the default page. It is the page if none of your other routes are matched.</p>
+            <p>QJS has a lot of basic options for PWAs that should allow a motivated developer to create something robust but live. Not needing to compile means development can be swift. Luckily most of the work done in this environment can easily be ported over to any more complex javascript frameworks, but I find I often like to simply write code and move.</p>
+        `)
     );
 }
 
