@@ -9,7 +9,14 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bronkula/core_css@1.0.0/dist/core_lite.css">
 
-    <base href="/" />
+    <script>
+        window.document.write(
+            window.location.host === bronkula.github.io ?
+            "<base href='/qjs' />" :
+            "<base href='/' />"
+        );
+    </script>
+    
     <script src="./dist/query.min.js"></script>
     <script src="./src/query-route.js"></script>
 
