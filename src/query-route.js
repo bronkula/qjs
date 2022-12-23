@@ -8,113 +8,129 @@ const LINK = 'link';
 const SLASH = '/';
 const EMPTY = '';
 
-const route = {
-    state : {},
-    root : SLASH,
-    style : HASH,
-    navigate : (str, updateUrl = true) => {
-        if(str==BACK) {
-            if(w.history.state != null) w.history.back();
-        }
-        else if (w.history.pushState) {
-            setActive({
-                title: str,
-                url: q.getext(str),
-            }, updateUrl);
-        } else {
-            w.location.assign(route.state.url);
-        }
-    },
-    matches: (basis, tocheck) => {
-        if (basis[0] != tocheck[0]) return false;
-        let props = {};
-        for(let i in basis) {
-            if (basis[i] == tocheck[i]) continue;
-            else if (tocheck[i].slice(0,1) == ":") props[tocheck[i].slice(1)] = basis[i];
-            else if (basis[i] != tocheck[i]) return false;
-        }
-        return props;
-    },
-    makenext: (str) => {
-        const isroot = [route.root, SLASH].includes(str);
-        if (route.style === HASH) {
-            const ext = isroot ? EMPTY : '#' + str;
-            return w.location.origin + w.location.pathname + ext;
-        } else if (route.style === BROWSER) {
-            const ext = isroot ? EMPTY : str;
-            return w.location.origin + route.root + ext;
-        } else {
-            return EMPTY;
-        }
-    },
-    getroot: (basis) => {
-        return basis ?? 
-            route.style === BROWSER ? w.location.pathname.slice(route.root.length) :
-            route.style === HASH ? w.location.hash.slice(1) :
-            EMPTY;
-    },
-    make: (routes = {}, page = ()=>{}, basis) => {
-        let hashroute = route.getroot(basis);
-        let hashsplit = hashroute.split(SLASH);
-        let props = {};
-        if(hashroute != EMPTY) {
-            for(let [checkroute,fn] of Object.entries(routes)) {
-                props = {};
-                if (checkroute==hashroute) { page = fn; break; }
-                let checksplit = checkroute.split(SLASH);
-                if(checksplit[0]==hashsplit[0] && checksplit.length==hashsplit.length) {
-                    props = route.matches(hashsplit,checksplit);
-                    if (props!==false) { page = fn; break; }
-                }
+
+const state = {};
+const root = SLASH;
+const style = HASH;
+const navigate = (str, updateUrl = true) => {
+    if(str === BACK) {
+        if(w.history.state != null) w.history.back();
+    }
+    else if (w.history.pushState) {
+        setActive({
+            title: str,
+            url: makenext(str),
+        }, updateUrl);
+    } else {
+        w.location.assign(state.url);
+    }
+};
+const matches = (basis, tocheck) => {
+    if (tocheck[0] === EMPTY && tocheck.length > 0) tocheck.shift();
+    if (basis[0] != tocheck[0]) return false;
+    let props = {};
+    for(let i in basis) {
+        if (basis[i] == tocheck[i]) continue;
+        else if (tocheck[i].slice(0,1) == ":") props[tocheck[i].slice(1)] = basis[i];
+        else if (basis[i] != tocheck[i]) return false;
+    }
+    return props;
+};
+const makenext = (str) => {
+    if (route.style === HASH) {
+        return w.location.origin + w.location.pathname + (isroot(str) ? EMPTY : '#' + str);
+    } else if (route.style === BROWSER) {
+        const ext = hasroot(str) ? route.root + rootremove(str) : w.location.pathname + SLASH + str;
+        return w.location.origin + ext;
+    } else {
+        return EMPTY;
+    }
+};
+const roots = () => ([route.root, SLASH]);
+const rootregexp = () => new RegExp(`^(${roots().join('|')})`);
+const rootremove = (str) => str.replace(rootregexp(),EMPTY);
+const isroot = (str) => roots().includes(str);
+const hasroot = (str) => str.match(rootregexp());
+const getroot = (basis) => {
+    return basis ?? 
+        route.style === BROWSER ? w.location.pathname.slice(route.root.length) :
+        route.style === HASH ? w.location.hash.slice(1) :
+        EMPTY;
+};
+const make = (routes = {}, page = ()=>{}, basis) => {
+    let hashroute = getroot(basis);
+    let hashsplit = hashroute.split(SLASH);
+    let props = {};
+    if(hashroute !== EMPTY) {
+        for(let [checkroute,fn] of Object.entries(routes)) {
+            props = {};
+            if (checkroute === hashroute) { page = fn; break; }
+            let checksplit = checkroute.split(SLASH);
+            if(checksplit[0] === hashsplit[0] && checksplit.length === hashsplit.length) {
+                props = matches(hashsplit,checksplit);
+                if (props!==false) { page = fn; break; }
             }
         }
-        return (data)=>page(props,data);
-    },
+    }
+    return (data) => page(props,data);
+};
+
+const route = {
+    state,
+    root,
+    style,
+    navigate,
+    matches,
+    makenext,
+    roots,
+    rootregexp,
+    rootremove,
+    isroot,
+    hasroot,
+    getroot,
+    make,
 };
 
 const events = {
-    pageshow: state => w.document.dispatchEvent(new CustomEvent(PAGESHOW, {
+    pageshow: newstate => w.document.dispatchEvent(new CustomEvent(PAGESHOW, {
         detail:{
-            nextPage: {...state},
-            prevPage: {...route.state}
+            nextPage: {...newstate},
+            prevPage: {...state}
         }
     })),
 };
 
-const setActive = (state,update) => {
-    if(state==null) {
-        state = {
-            title: 
-                route.style === HASH ? w.location.hash.slice(1) :
-                route.style === BROWSER ? w.location.pathname.slice(route.root.length) :
-                EMPTY,
+const setActive = (newstate,update) => {
+    if(newstate === null) {
+        newstate = {
+            title: getroot(),
             url: w.location.href
         };
     }
-    w.history[update?'pushState':'replaceState'](state, state.title, state.url);
-    events.pageshow(state);
-    route.state = {...state};
+    w.history[update?'pushState':'replaceState'](newstate, newstate.title, newstate.url);
+    events.pageshow(newstate);
+    Object.entries(newstate).forEach(([key,val])=>state[key] = val);
 };
 
 if(w.q && w.document) {
-    route.makepage = async ({page,data,selector=EMPTY}) => {
+    const makepage = async ({page,data,selector=EMPTY}) => {
         try {
             let d = await page(data);
             q(selector).html(d);
         } catch(e) {
             throw(e);
         }
-    },
-    route.init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
-        q(w.document).on(PAGESHOW, async (event) => {
+    };
+    const init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
+        q(w.document).on(PAGESHOW, async () => {
             try {
-                const page = route.make(routes, defaultPage);
-                await route.makepage({
+                const page = make(routes, defaultPage);
+                await makepage({
                     page,
                     selector,
                 });
             } catch(e) {
-                route.makepage({
+                makepage({
                     page: errorPage,
                     selector,
                     data: e,
@@ -128,19 +144,20 @@ if(w.q && w.document) {
             if (route.style === HASH && this.href[0] === '#') {
                 e.preventDefault();
                 const r = this.attributes.href.value.slice(1);
-                if(r !== EMPTY) route.navigate(r);
+                if(r !== EMPTY) navigate(r);
             } else
             if (route.style === BROWSER && this.dataset.role === LINK) {
                 e.preventDefault();
                 const r = this.attributes.href;
-                if(r !== EMPTY) route.navigate(r.value);
+                if(r !== EMPTY) navigate(r.value);
             } else
             if (route.style === BROWSER && this.dataset.rel === BACK) {
                 e.preventDefault();
-                route.navigate(BACK);
+                navigate(BACK);
             }
         });
     });
+    Object.entries({makepage,init}).forEach(([key,val])=>route[key] = val);
     q.route = route;
 }
 else w.route = route;

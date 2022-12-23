@@ -12,11 +12,11 @@ Who needs this library? Anyone who likes to make websites on an old AMP stack, a
 
 ### Current Release
 
-**v 1.0.8**
+**v 1.0.9**
 
-- [query](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.8/dist/query.min.js)
-- [query lite](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.8/dist/query-lite.min.js)
-- [query route](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.8/dist/query-route.min.js)
+- [query](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.9/dist/query.min.js)
+- [query lite](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.9/dist/query-lite.min.js)
+- [query route](https://cdn.jsdelivr.net/gh/bronkula/qjs@v1.0.9/dist/query-route.min.js)
 
 ### Route Demo
 

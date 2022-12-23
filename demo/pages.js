@@ -4,11 +4,11 @@ import { Nav, NavLink } from "./Navs.js";
 const nav = () => {
     return Nav(
         NavLink('/','Main Page'),
-        NavLink('page/1','Page 1'),
-        NavLink('page/more','Page More'),
-        NavLink('page/blorf','Page blorf'),
-        NavLink('load','Loaded Page'),
-        NavLink('bad','Error Page'),
+        NavLink('/page/1','Page 1'),
+        NavLink('/page/more','Page More'),
+        NavLink('/page/blorf','Page blorf'),
+        NavLink('/load','Loaded Page'),
+        NavLink('/bad','Error Page'),
     );
 }
 
