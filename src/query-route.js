@@ -1,23 +1,31 @@
 ;((w)=>{
 
-const stateObj = {};
+const PAGESHOW = 'pageshow';
+const HASH = 'hash';
+const BROWSER = 'browser';
+const BACK = 'back';
+const LINK = 'link';
+const SLASH = '/';
+const EMPTY = '';
 
 const route = {
-    root : '/',
-    style : 'hash',
-    navigate : (str,updateUrl=true) => {
-        if(str=="back") {
+    state : {},
+    root : SLASH,
+    style : HASH,
+    navigate : (str, updateUrl = true) => {
+        if(str==BACK) {
             if(w.history.state != null) w.history.back();
         }
         else if (w.history.pushState) {
+            const ext = [route.root, SLASH].contains(str) ? EMPTY : str;
             setActive({
                 title: str,
-                url: route.style === 'hash' ? w.location.origin + w.location.pathname + "#" + str :
-                    route.style === 'browser' ? w.location.origin + route.root + (str !== route.root ? str : '') :
-                    ''
-            },updateUrl);
+                url: route.style === HASH ? w.location.origin + w.location.pathname + "#" + str :
+                    route.style === BROWSER ? w.location.origin + route.root + ext :
+                    EMPTY
+            }, updateUrl);
         } else {
-            w.location.assign(stateObj.url);
+            w.location.assign(route.state.url);
         }
     },
     matches: (basis, tocheck) => {
@@ -32,19 +40,19 @@ const route = {
     },
     getroot: (basis) => {
         return basis ?? 
-            route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
-            route.style === 'hash' ? w.location.hash.slice(1) :
-            '';
+            route.style === BROWSER ? w.location.pathname.slice(route.root.length) :
+            route.style === HASH ? w.location.hash.slice(1) :
+            EMPTY;
     },
-    make: (routes,page=()=>{},basis) => {
+    make: (routes = {}, page = ()=>{}, basis) => {
         let hashroute = route.getroot(basis);
-        let hashsplit = hashroute.split("/");
+        let hashsplit = hashroute.split(SLASH);
         let props = {};
-        if(hashroute != '') {
+        if(hashroute != EMPTY) {
             for(let [checkroute,fn] of Object.entries(routes)) {
                 props = {};
                 if (checkroute==hashroute) { page = fn; break; }
-                let checksplit = checkroute.split("/");
+                let checksplit = checkroute.split(SLASH);
                 if(checksplit[0]==hashsplit[0] && checksplit.length==hashsplit.length) {
                     props = route.matches(hashsplit,checksplit);
                     if (props!==false) { page = fn; break; }
@@ -55,36 +63,32 @@ const route = {
     },
 };
 
-const setActive = (state,update) => {
+const events = {
+    pageshow: state => w.document.dispatchEvent(new CustomEvent(PAGESHOW, {
+        detail:{
+            nextPage: {...state},
+            prevPage: {...route.state}
+        }
+    })),
+};
 
+const setActive = (state,update) => {
     if(state==null) {
         state = {
             title: 
-                route.style === 'hash' ? w.location.hash.slice(1) :
-                route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
-                '',
-            url:w.location.href
+                route.style === HASH ? w.location.hash.slice(1) :
+                route.style === BROWSER ? w.location.pathname.slice(route.root.length) :
+                EMPTY,
+            url: w.location.href
         };
     }
-    
-    stateObj.state = {...state};
-    
-    w.history[update?'pushState':'replaceState']
-        (state, state.title, state.url);
-
-    w.document.dispatchEvent(
-        new CustomEvent("pageshow",{
-            detail:{
-                nextPage:{...state},
-                prevPage:{...stateObj.state}
-            }
-        })
-    );
-
+    w.history[update?'pushState':'replaceState'](state, state.title, state.url);
+    events.pageshow(state);
+    route.state = {...state};
 };
 
 if(w.q && w.document) {
-    route.makepage = async ({page,data,selector=''}) => {
+    route.makepage = async ({page,data,selector=EMPTY}) => {
         try {
             let d = await page(data);
             q(selector).html(d);
@@ -92,8 +96,8 @@ if(w.q && w.document) {
             throw(e);
         }
     },
-    route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
-        q(w.document).on("pageshow",async (event)=>{
+    route.init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
+        q(w.document).on(PAGESHOW, async (event) => {
             try {
                 const page = route.make(routes, defaultPage);
                 await route.makepage({
@@ -104,7 +108,7 @@ if(w.q && w.document) {
                 route.makepage({
                     page: errorPage,
                     selector,
-                    data: e
+                    data: e,
                 });
                 throw("Page failed: "+ e);
             }
@@ -112,21 +116,20 @@ if(w.q && w.document) {
     };
     q(()=>{
         q(w.document).delegate("click","a",function(e){
-            if (route.style === 'hash' && this.href[0] === '#') {
+            if (route.style === HASH && this.href[0] === '#') {
                 e.preventDefault();
-                let r = this.attributes.href.value.slice(1);
-                if(r !== "") route.navigate(r);
+                const r = this.attributes.href.value.slice(1);
+                if(r !== EMPTY) route.navigate(r);
             } else
-            if (route.style === 'browser' && this.dataset.role === 'link') {
+            if (route.style === BROWSER && this.dataset.role === LINK) {
                 e.preventDefault();
-                let r = this.attributes.href;
-                if(r !== "") route.navigate(r.value);
+                const r = this.attributes.href;
+                if(r !== EMPTY) route.navigate(r.value);
             } else
-            if (route.style === 'browser' && this.dataset.rel === 'back') {
+            if (route.style === BROWSER && this.dataset.rel === BACK) {
                 e.preventDefault();
-                route.navigate('back');
+                route.navigate(BACK);
             }
-            e.preventDefault();
         });
     });
     q.route = route;
