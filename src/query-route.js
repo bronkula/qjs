@@ -17,7 +17,7 @@ const route = {
             if(w.history.state != null) w.history.back();
         }
         else if (w.history.pushState) {
-            const ext = [route.root, SLASH].contains(str) ? EMPTY : str;
+            const ext = [route.root, SLASH].includes(str) ? EMPTY : str;
             setActive({
                 title: str,
                 url: route.style === HASH ? w.location.origin + w.location.pathname + "#" + str :
