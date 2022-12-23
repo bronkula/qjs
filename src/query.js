@@ -42,6 +42,7 @@ Q.prototype.reduce = Array.prototype.reduce;
 Q.prototype.some = Array.prototype.some;
 Q.prototype.every = Array.prototype.every;
 Q.prototype.filter = Array.prototype.filter;
+Q.prototype.slice = Array.prototype.slice;
 
 
 
@@ -53,6 +54,7 @@ const q = (s,sc,d) => new Q(s,sc,d);
 q.isElement = d => d instanceof HTMLDocument || d instanceof HTMLElement || d instanceof SVGElement || d instanceof Element;
 q.isHTML = d => d instanceof HTMLElement || d instanceof HTMLDocument;
 q.isSVG = d => d instanceof SVGElement;
+q.isObject = d => d instanceof Object && !Array.isArray(d) && d !== null;
 q.isString = d => typeof d == "string" || d instanceof String;
 q.isFunction = d => typeof d == "function";
 q.isQ = d => d instanceof Q;

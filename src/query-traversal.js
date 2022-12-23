@@ -26,5 +26,7 @@ q.extend('siblings',function(s){
         })
     }); });
 
+q.extend('item',function(e){
+    return q(this[e]); });
 
 })();
