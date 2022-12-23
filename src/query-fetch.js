@@ -11,15 +11,13 @@ q.catchJson = async d => {
 
 q.promiseList = (t) => (l,f=d=>d) => 
    l.map((...u) => pd => t(...u).then(d => pd.concat([f(d)])));
-//let promiseEach = (l) => 
-//   l.reduce((r,f) => r.then(f),Promise.resolve([]));
 q.promiseEach = (l) => 
    l.reduce((r,f) => {
-     if(Array.isArray(f)) {
-       let [fulfill=(()=>{}),reject=(()=>{})] = f;
-       return r.then(fulfill ,reject);
-     } else return r.then(f);
-   },Promise.resolve([]));
+      if(Array.isArray(f)) {
+         let [fulfill=()=>{}, reject=()=>{}] = f;
+         return r.then(fulfill, reject);
+      } else return r.then(f);
+   }, Promise.resolve([]));
 
 
 
@@ -53,6 +51,16 @@ q.postForm = (u, o={}) =>
 q.postFormAll = d => Promise.all(d.map(o => q.postForm(...q.asArray(o))));
 q.postFormList = q.promiseList(q.postForm);
 q.postFormEach = l => q.promiseEach(q.postFormList(l));
+
+
+
+q.getHTML = async (d) => {
+   q.getHTML.files ??= {};
+   if (d.getHTML.files[d]) return q(d.getHTML.files[d]);
+   const file = await fetch(d).then(d=>d.text()).catch(()=>false);
+   if (file) d.getHTML.files[d] = file;
+   return q(file);
+}
 
 
 })();

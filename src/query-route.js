@@ -17,12 +17,9 @@ const route = {
             if(w.history.state != null) w.history.back();
         }
         else if (w.history.pushState) {
-            const ext = [route.root, SLASH].includes(str) ? EMPTY : str;
             setActive({
                 title: str,
-                url: route.style === HASH ? w.location.origin + w.location.pathname + "#" + str :
-                    route.style === BROWSER ? w.location.origin + route.root + ext :
-                    EMPTY
+                url: q.getext(str),
             }, updateUrl);
         } else {
             w.location.assign(route.state.url);
@@ -37,6 +34,18 @@ const route = {
             else if (basis[i] != tocheck[i]) return false;
         }
         return props;
+    },
+    makenext: (str) => {
+        const isroot = [route.root, SLASH].includes(str);
+        if (route.style === HASH) {
+            const ext = isroot ? EMPTY : '#' + str;
+            return w.location.origin + w.location.pathname + ext;
+        } else if (route.style === BROWSER) {
+            const ext = isroot ? EMPTY : str;
+            return w.location.origin + route.root + ext;
+        } else {
+            return EMPTY;
+        }
     },
     getroot: (basis) => {
         return basis ?? 
