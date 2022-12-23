@@ -5,14 +5,13 @@ const nav = () => {
     return Nav(
         NavLink('/','Main Page'),
         NavLink('/page/1','Page 1'),
-        NavLink('/page/more','Page More'),
-        NavLink('/page/blorf','Page blorf'),
         NavLink('/load','Loaded Page'),
         NavLink('/bad','Error Page'),
     );
 }
 
 export const MainPage = async () => {
+    window.document.title = "QJS: default page example";
     return Container(
         nav(),
         Card(`
@@ -23,6 +22,7 @@ export const MainPage = async () => {
 }
 
 export const BasicPage = async ({route}) => {
+    window.document.title = "QJS: data page example";
     return Container(
         nav(),
         Card(`This is a page that is routed from anything with the 'page' route. It is passed extra information, which in this case was '${route}'.`)
@@ -30,6 +30,7 @@ export const BasicPage = async ({route}) => {
 }
 
 export const ErrorPage = async (error) => {
+    window.document.title = "QJS: error page example";
     return Container(
         nav(),
         Card("This is the error page. Errors can be automatically routed to an appropriate design or default page.",
@@ -39,7 +40,11 @@ export const ErrorPage = async (error) => {
 
 export const LoadedPage = async () => {
     LoadedPage.htm = LoadedPage.htm ?? await fetch('./demo/loaded.htm').then(d=>d.text());
-    return q(LoadedPage.htm);
+    window.document.title = "QJS: loaded file example";
+    return Container(
+        nav(),
+        LoadedPage.htm
+    );
 }
 
 export const BadPage = async () => {

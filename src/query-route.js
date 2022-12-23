@@ -109,11 +109,11 @@ const setActive = (newstate,update) => {
     }
     w.history[update?'pushState':'replaceState'](newstate, newstate.title, newstate.url);
     events.pageshow(newstate);
-    Object.entries(newstate).forEach(([key,val])=>state[key] = val);
+    Object.assign(state,newstate);
 };
 
 if(w.q && w.document) {
-    const makepage = async ({page,data,selector=EMPTY}) => {
+    const makepage = async ({page, data, selector=EMPTY}) => {
         try {
             let d = await page(data);
             q(selector).html(d);
@@ -125,12 +125,12 @@ if(w.q && w.document) {
         q(w.document).on(PAGESHOW, async () => {
             try {
                 const page = make(routes, defaultPage);
-                await makepage({
+                await route.makepage({
                     page,
                     selector,
                 });
             } catch(e) {
-                makepage({
+                route.makepage({
                     page: errorPage,
                     selector,
                     data: e,
@@ -157,7 +157,7 @@ if(w.q && w.document) {
             }
         });
     });
-    Object.entries({makepage,init}).forEach(([key,val])=>route[key] = val);
+    Object.assign(route, { makepage, init });
     q.route = route;
 }
 else w.route = route;

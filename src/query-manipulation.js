@@ -29,23 +29,23 @@ q.extend('replaceWith',function(e){ if(!q.isQ(e)) e=q(e);
 
 /* Class List Methods */
 q.extend('addClass',function(e){
-    return this.pipe(o=>{ o.classList.add(e); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.classList.add(c)); return o; }); });
 q.extend('removeClass',function(e){
-    return this.pipe(o=>{ o.classList.remove(e); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.classList.remove(c)); return o; }); });
 q.extend('toggleClass',function(e, force){
-    return this.pipe(o=>{ o.classList.toggle(e, force); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.classList.toggle(c, force)); return o; }); });
 q.extend('hasClass',function(e){
-    return this.some(o=>o.classList.contains(e)); });
+    return this.some(o=>q.tokenList(e).every(c=>o.classList.contains(c))); });
 
 /* Attribute Methods */
 q.extend('addAttr',function(e){
-    return this.pipe(o=>{ o.setAttribute(e,true); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.setAttribute(c,true)); return o; }); });
 q.extend('removeAttr',function(e){
-    return this.pipe(o=>{ o.removeAttribute(e); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.removeAttribute(c)); return o; }); });
 q.extend('toggleAttr',function(e, force){
-    return this.pipe(o=>{ o.toggleAttribute(e, force); return o; }); });
+    return this.pipe(o=>{ q.tokenList(e).forEach(c=>o.toggleAttribute(c, force)); return o; }); });
 q.extend('hasAttr',function(e){
-    return this.pipe(o=>{ o.hasAttribute(e); return o; }); });
+    return this.pipe(o=>q.tokenList(e).every(c=>o.hasAttribute(c))); });
 
 /* Getters and Setters */
 q.extend('css',function(e){
@@ -74,7 +74,7 @@ q.extend('rect',function(){
     return this[0].getBoundingClientRect(); });
 q.extend('classList',function(){
     return [...this[0].classList]; });
-q.extend('className',function(){
+q.extend('class',function(){
     return this[0].className; });
 q.extend('index',function(e){
     if (e !== undefined) return this.toArray().indexOf(e);
@@ -95,6 +95,11 @@ q.setHTML = (o,...e) => {
     o.innerHTML = ""; let s = q.settle(e);
     s.forEach(i=>o.append(q.isString(i)?q.htmlEncode(i):i));
     return o; }
+
+q.tokenList = (s) =>
+    q.isArray(s) ? e :
+    q.isString(s) ? s.split(' ') :
+    [];
 
 
 /* Cache methods for data manipulation */
