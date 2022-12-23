@@ -25,10 +25,10 @@ export const SVGIcon = src => El('img')({src:'img/icon/'+src+'.svg',class:'icon'
 
 export const Page = Div({class:'page','data-role':'page'});
 
-export const Header = El('header')({class:'header','data-role':'header'});
-export const Main = Div({class:'main','data-role':'main'});
-export const MainFlex = Div({class:'main display-flex flex-column','data-role':'main'});
-export const Footer = El('footer')({class:'footer','data-role':'footer'});
+export const Header = El('header',{class:'header','data-role':'header'})();
+export const Main = El('div',{class:'main','data-role':'main'})();
+export const MainFlex = (...ch) => Main(...ch).addClass('display-flex flex-column');
+export const Footer = El('footer',{class:'footer','data-role':'footer'})();
 
 export const FlexStretch = Div({class:'flex-stretch'});
 export const FlexNone = Div({class:'flex-none'});

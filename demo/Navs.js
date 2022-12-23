@@ -14,8 +14,8 @@ export const NavButton = (check) => (link,name,events={}) =>
    NavLi(link, check) ( El('button', {type:'button'}) ({href:link}, events) (name) );
 
 export const NavBar = (title) => (...ch) =>
-   El('Header')({class:'navbar'})(
-      El('container')({class:'container flex-parent flex-align-center'})(
+   El('Header')({class:'navbar '})(
+      El('div')({class:'container flex-parent flex-align-center'})(
          FlexNone(El('h1')()(title)),
          FlexStretch(),
          El('nav')({class:'nav pills flex-none nav-flex'})(
