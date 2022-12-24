@@ -1,6 +1,6 @@
 {
   "name": "qjs",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A DOM querying library",
   "main": "index.js",
   "scripts": {

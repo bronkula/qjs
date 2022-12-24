@@ -26,9 +26,10 @@ class Q {
     pipe(f) { return q(this.map(f)); }
 
     /* See if any Q elements match a selector */
-    is(s) { return this.some(o=>o.matches(s)); }
+    is(s) { return this.some(o=>q.isElement(o) ? o.matches(s) : false); }
     not(s) { return !this.is(s); }
 
+    /* Alter a Q selection to a more basic type */
     toArray() { return this.reduce((r,o)=>r.concat([o]),[]) }
     toString() { return this.reduce((r,o)=>r+q.isElement(o)?o.outerHTML:`${o}`,'') }
     toText() { return this.reduce((r,o)=>r+q.isElement(o)?o.innerText:`${o}`,'') }
@@ -113,7 +114,9 @@ q.debug = (s,sc,nl) => {
     console.log("isArray S",q.isArray(s));
     console.log("isEntity S",q.isEntity(s));
     console.log("isJson S",q.isJson(s));
-    console.log("querySelectorAll S",sc.querySelectorAll(s));
+    console.log("isString S",q.isString(s));
+    console.log("isObject S",q.isObject(s));
+    try {console.log("querySelectorAll S",sc.querySelectorAll(s));} catch(e){}
     console.log("node list",nl);
     console.groupEnd();
 }

@@ -39,11 +39,38 @@ export const ErrorPage = async (error) => {
 }
 
 export const LoadedPage = async () => {
-    LoadedPage.htm = LoadedPage.htm ?? await fetch('./demo/loaded.htm').then(d=>d.text());
-    window.document.title = "QJS: loaded file example";
+    /* Fetch am html fragment document and cache it into the page function */
+    LoadedPage.htm ??= q(await fetch('./demo/loaded.htm').then(d=>d.text()));
+
+    /* Pull a title element out of a fragment, and use it each time this page is rendered */
+    if (LoadedPage.title === undefined) {
+        const title = LoadedPage.htm.matching('title');
+        LoadedPage.title = title.length ? title.text() : false;
+        LoadedPage.htm = LoadedPage.htm.notMatching('title');
+    }
+    if (LoadedPage.title) window.document.title = LoadedPage.title;
+    
+    
     return Container(
         nav(),
         LoadedPage.htm
+    );
+}
+
+export const DownloadPage = async () => {
+    DownloadPage.package ??= await q.get('package.json');
+    return Container(
+        Card(`
+            <h2 id="getting-started">Getting Started</h2>
+            <p>Starting a new QJS project can be as simple as pulling it in from a repository.</p>
+            <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query.min.js">&lt;/script></code>
+            <p>There is a lite version that just includes the basic querying and event handling. It does not include dom traversal or manipulation methods.</p>
+            <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query-lite.min.js">&lt;/script></code>
+            <p>Also available, is a routing extension that allows standard or hash routing.</p>
+            <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query-route.min.js">&lt;/script></code>
+            <p>One more set of tools are the fetch extensions. This has a nice set of tools for fetching data or other pages into the document.</p>
+            <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query-fetch.min.js">&lt;/script></code>
+        `)
     );
 }
 

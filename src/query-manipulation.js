@@ -4,9 +4,9 @@ if(!q) throw "qjs not imported yet";
 
 /* Manipulation methods */
 q.extend('remove',function(){
-    return this.sift(o=>{ o.parentElement.removeChild(o); return false; }) });
+    return this.sift(o=>{ o.parentElement?.removeChild(o); return false; }) });
 q.extend('detach',function(){
-    return this.sift(o=>{ o.parentElement.removeChild(o); return o; }) });
+    return this.sift(o=>o.parentElement?.removeChild(o) ?? o); });
 
 q.extend(['clear','empty'],function(){ return this.pipe(q.clear) });
 
@@ -108,7 +108,7 @@ q.setCache = function(o,k,v) {
     if (k) o.qcache[k]=v; }
 q.setData = function(o,e) {
     if (o.qcache === undefined) o.qcache = {};
-    for (let i in e) { if (e.hasOwnProperty(i)){ o.qcache[i]=e[i]; } } return o; }
+    Object.assign(o.qcache,e); return o; }
 q.getData = function(o,e) {
     if (o.qcache === undefined) {
         o.qcache = {};

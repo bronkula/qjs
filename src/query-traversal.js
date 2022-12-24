@@ -25,6 +25,10 @@ q.extend('siblings',function(s){
             return a==o?false:s?a.matches(s):true;
         })
     }); });
+q.extend('matching',function(s){
+    return q(this.filter(o=>q.isElement(o) ? o.matches(s) : false)); });
+q.extend('notMatching',function(s){
+    return q(this.filter(o=>q.isElement(o) ? !o.matches(s) : true)); });
 
 q.extend('item',function(e){
     return q(this[e]); });
