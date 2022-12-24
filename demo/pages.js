@@ -62,7 +62,7 @@ export const DownloadPage = async () => {
     return Container(
         Card(`
             <h2 id="getting-started">Getting Started</h2>
-            <p>Starting a new QJS project can be as simple as pulling it in from a repository.</p>
+            <p>Starting a new QJS project can be as simple as pulling it in from a repository. The current version is v${DownloadPage.package.version}. You can use jsdelivr to always get the most current version, but generally that's considered not a good idea.</p>
             <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query.min.js">&lt;/script></code>
             <p>There is a lite version that just includes the basic querying and event handling. It does not include dom traversal or manipulation methods.</p>
             <code class="block">&lt;script src="https://cdn.jsdelivr.net/gh/bronkula/qjs@v${DownloadPage.package.version}/dist/query-lite.min.js">&lt;/script></code>
