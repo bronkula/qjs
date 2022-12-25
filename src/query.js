@@ -19,31 +19,34 @@ class Q {
         this.length = nl.length;
     }
 
-    find(s){ return this.sift(o=>q(s,o)); }
-
     /* Return only unique, non false, elements */
     sift(f) { return q(q.sift(this,f)); }
     pipe(f) { return q(this.map(f)); }
-
-    /* See if any Q elements match a selector */
-    is(s) { return this.some(o=>q.isElement(o) ? o.matches(s) : false); }
-    not(s) { return !this.is(s); }
 
     /* Alter a Q selection to a more basic type */
     toArray() { return this.reduce((r,o)=>r.concat([o]),[]) }
     toString() { return this.reduce((r,o)=>r+q.isElement(o)?o.outerHTML:`${o}`,'') }
     toText() { return this.reduce((r,o)=>r+q.isElement(o)?o.innerText:`${o}`,'') }
+    
+    forEach = Array.prototype.forEach;
+    map = Array.prototype.map;
+    flatMap = Array.prototype.flatMap;
+    reduce = Array.prototype.reduce;
+    some = Array.prototype.some;
+    every = Array.prototype.every;
+    filter = Array.prototype.filter;
+    slice = Array.prototype.slice;
 }
 
 /* Basic array methods */
-Q.prototype.forEach = Array.prototype.forEach;
-Q.prototype.map = Array.prototype.map;
-Q.prototype.flatMap = Array.prototype.flatMap;
-Q.prototype.reduce = Array.prototype.reduce;
-Q.prototype.some = Array.prototype.some;
-Q.prototype.every = Array.prototype.every;
-Q.prototype.filter = Array.prototype.filter;
-Q.prototype.slice = Array.prototype.slice;
+// Q.prototype.forEach = Array.prototype.forEach;
+// Q.prototype.map = Array.prototype.map;
+// Q.prototype.flatMap = Array.prototype.flatMap;
+// Q.prototype.reduce = Array.prototype.reduce;
+// Q.prototype.some = Array.prototype.some;
+// Q.prototype.every = Array.prototype.every;
+// Q.prototype.filter = Array.prototype.filter;
+// Q.prototype.slice = Array.prototype.slice;
 
 
 
@@ -62,16 +65,17 @@ q.isQ = d => d instanceof Q;
 q.isArray = d => Array.isArray(d);
 q.isFragment = d => q.isString(d) && d.trim()[0]=="<";
 q.isEntity = d => q.isString(d) && d.trim()[0]=="&" && d.trim().substr(-1)==";";
-q.isJson = s => {
+q.isJson = (s) => {
     s = typeof s !== "string" ? JSON.stringify(s) : s;
     try { s = JSON.parse(s); } catch (e) { return false; }
     return typeof s === "object" && s !== null;
 }
-q.parse = d => { try{ return JSON.parse(d); } catch(e){ return d; } }
+q.parse = (d) => { try { return JSON.parse(d); } catch(e) { return d; } }
+q.matching = (s) => (o) => { try { return !s || o.matches(s); } catch(e) { return false; } }
 
 
-q.asArray = d => Array.isArray(d)?d:[d];
-q.makeFragment = s => q.isFragment(s) ?
+q.asArray = (d) => Array.isArray(d) ? d : [d];
+q.makeFragment = (s) => q.isFragment(s) ?
     [...document.createRange().createContextualFragment(s.trim()).childNodes] : [s];
 q.make = (s) => q(q.makeFragment(s));
 
@@ -92,32 +96,32 @@ q.hasExtension = (key) => {
 q.sift = (s,f) => {
     let set = s.toArray().flatMap(f);
     return [...(new Set(set))]; }
-
-q.settle = o => {
-    return o.flatMap(e=> !e ? [] :
+q.settle = (o) => {
+    return o.flatMap(e=>!e ? [] :
         q.isFragment(e) ? q.makeFragment(e) :
         q.isQ(e) ? e.toArray() : e ); }
 
 
 q.debug = (s,sc,nl) => {
+    const l = console.log;
     console.group();
-    console.log("debug");
-    console.log("selector",s);
-    console.log("selector context",sc);
-    console.log("isHTML SC",q.isHTML(sc));
-    console.log("isHTML S",q.isHTML(s));
-    console.log("isSVG S",q.isSVG(s));
-    console.log("isQ S",q.isQ(s));
-    console.log("isElement S",q.isElement(s));
-    console.log("isFragment S",q.isFragment(s));
-    console.log("isFunction S",q.isFunction(s));
-    console.log("isArray S",q.isArray(s));
-    console.log("isEntity S",q.isEntity(s));
-    console.log("isJson S",q.isJson(s));
-    console.log("isString S",q.isString(s));
-    console.log("isObject S",q.isObject(s));
-    try {console.log("querySelectorAll S",sc.querySelectorAll(s));} catch(e){}
-    console.log("node list",nl);
+    l("debug");
+    l("selector",s);
+    l("selector context",sc);
+    l("isHTML SC",q.isHTML(sc));
+    l("isHTML S",q.isHTML(s));
+    l("isSVG S",q.isSVG(s));
+    l("isQ S",q.isQ(s));
+    l("isElement S",q.isElement(s));
+    l("isFragment S",q.isFragment(s));
+    l("isFunction S",q.isFunction(s));
+    l("isArray S",q.isArray(s));
+    l("isEntity S",q.isEntity(s));
+    l("isJson S",q.isJson(s));
+    l("isString S",q.isString(s));
+    l("isObject S",q.isObject(s));
+    try {l("querySelectorAll S",sc.querySelectorAll(s));} catch(e){}
+    l("node list",nl);
     console.groupEnd();
 }
 
