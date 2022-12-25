@@ -24,19 +24,12 @@ const navigate = (str, updateUrl = true) => {
     let path = makepath(str);
 
     if (str === BACK || path.fullroute === prev.fullroute && prev.fullroute !== next.fullroute) {
-        if(w.history.state !== null) {
-            Object.assign(next,prev);
-            Object.assign(prev,makepath(w.location.pathname + w.location.hash));
-            w.history.back();
-        }
+        if(w.history.state !== null) w.history.back();
     } else if (w.history.pushState) {
-        if (prev.fullroute !== next.fullroute) {
-            Object.assign(prev,next);
-            route.setnext(str);
-        }
-        setActive(makestate(next.fullroute, next.href), updateUrl);
+        setActive(makestate(path.fullroute, path.href), updateUrl);
     } else {
         w.location.assign(state.url);
+        return;
     }
 };
 const matches = (basis, tocheck) => {
@@ -77,19 +70,24 @@ const makepath = (str) => {
         path: root.split(SLASH),
     };
 }
-const setnext = (str) => Object.assign(next, makepath(str));
+const emptyobject = (obj) => Object.keys.forEach(k=>{ if (obj.hasOwn(k)) delete obj[k] });
 const roots = () => ([route.root, SLASH]);
 const rootregexp = () => new RegExp(`^(${roots().join('|')})`);
 const remroot = (str) => str.replace(rootregexp(),EMPTY);
 const isroot = (str) => roots().includes(str);
 const hasroot = (str) => str.match(rootregexp());
-const makestate = (title,url) => ({ title, url });
 const makeevent = (name) => (state) => w.document.dispatchEvent(new CustomEvent(name, { detail: state }));
+const makestate = (title, url, id) => {
+    makestate.id = id ?? makestate.id !== undefined ? makestate.id + 1 : 0;
+    return { id:makestate.id, title, url };
+}
 
-const setActive = (newstate, update) => {
-    if (!next.path) route.setnext(w.location.pathname + w.location.hash);
-    newstate ??= makestate(next.fullroute, next.href);
-    w.history[update?'pushState':'replaceState'](newstate, newstate.title, newstate.url);
+const setActive = (givenstate, update) => {
+    const path = makepath(givenstate?.title ?? w.location.pathname + w.location.hash);
+    newstate = givenstate ?? makestate(path.fullroute, path.href);
+    if (givenstate) Object.assign(prev, next);
+    Object.assign(next, path);
+    w.history[update && prev.fullroute !== next.fullroute ? 'pushState' : 'replaceState'](newstate, newstate.title, newstate.url);
     events.pageload({ nextPage: newstate, prevPage: state });
     Object.assign(state,newstate);
 };
@@ -110,7 +108,6 @@ const route = {
     navigate,
     matches,
     makepath,
-    setnext,
     roots,
     rootregexp,
     remroot,
@@ -135,7 +132,7 @@ if(w.q && w.document) {
         }
     };
     const init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
-        q(w.document).on(PAGELOAD, async (e) => {
+        q(w.document).on(PAGELOAD, async ({detail:{nextPage,prevPage}}) => {
             try {
                 const [page,data] = make(routes, defaultPage);
                 await route.makepage({
