@@ -6,12 +6,11 @@ q.route.root = window.location.host === 'bronkula.github.io' ? '/qjs/' : '/';
 q.route.makepage = async ({page, data, selector=EMPTY}) => {
     try {
         const qs = q(await page(data));
-        q.route.makepage.n ??= NavBar('QJS')(
-            NavLink('/download','Download'),
-            NavLink('/docs','Documentation'),
-        )
         q(selector).html(
-            q.route.makepage.n,
+            NavBar('QJS')(
+                NavLink('/download','Download'),
+                NavLink('/','Docs'),
+            ),
             qs,
         );
     } catch(e) {
@@ -24,6 +23,7 @@ q.route.init({
         "load": LoadedPage,
         "download": DownloadPage,
         "bad": BadPage,
+        ":route": BasicPage,
     },
     defaultPage: MainPage,
     errorPage: ErrorPage,

@@ -5,6 +5,8 @@ const nav = () => {
     return Nav(
         NavLink('/','Main Page'),
         NavLink('/page/1','Page 1'),
+        NavLink('/page/2#hash','Page 2 with hash',true),
+        NavLink('/page/2#other','Page 2 with other hash',true),
         NavLink('/load','Loaded Page'),
         NavLink('/bad','Error Page'),
     );
