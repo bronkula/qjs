@@ -38,19 +38,6 @@ class Q {
     slice = Array.prototype.slice;
 }
 
-/* Basic array methods */
-// Q.prototype.forEach = Array.prototype.forEach;
-// Q.prototype.map = Array.prototype.map;
-// Q.prototype.flatMap = Array.prototype.flatMap;
-// Q.prototype.reduce = Array.prototype.reduce;
-// Q.prototype.some = Array.prototype.some;
-// Q.prototype.every = Array.prototype.every;
-// Q.prototype.filter = Array.prototype.filter;
-// Q.prototype.slice = Array.prototype.slice;
-
-
-
-
 
 const q = (s,sc,d) => new Q(s,sc,d);
 
@@ -61,6 +48,7 @@ q.isSVG = d => d instanceof SVGElement;
 q.isObject = d => d instanceof Object && d !== null && !Array.isArray(d);
 q.isString = d => typeof d == "string" || d instanceof String;
 q.isFunction = d => typeof d == "function";
+q.isBool = d => typeof d == "boolean";
 q.isQ = d => d instanceof Q;
 q.isArray = d => Array.isArray(d);
 q.isFragment = d => q.isString(d) && d.trim()[0]=="<";
@@ -78,7 +66,7 @@ q.asArray = (d) => Array.isArray(d) ? d : [d];
 q.makeFragment = (s) => q.isFragment(s) ?
     [...document.createRange().createContextualFragment(s.trim()).childNodes] : [s];
 q.make = (s) => q(q.makeFragment(s));
-
+q.unQ = (e) => q.isQ(e) ? e[0] : e;
 
 q.htmlEncode = function(s) {
    let d = document.createElement('div');
@@ -124,7 +112,6 @@ q.debug = (s,sc,nl) => {
     l("node list",nl);
     console.groupEnd();
 }
-
 
 
 w.q = q;

@@ -11,17 +11,17 @@ q.extend('detach',function(){
 q.extend(['clear','empty'],function(){ return this.pipe(q.clear) });
 
 q.extend('append',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ o.appendChild(el); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ o.appendChild(el); return o; })); });
 q.extend('appendTo',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ el.appendChild(o); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ el.appendChild(o); return o; })); });
 q.extend('prepend',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ o.insertBefore(el,o.children[0]); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ o.insertBefore(el,o.children[0]); return o; })); });
 q.extend('prependTo',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ el.insertBefore(o,el.children[0]); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ el.insertBefore(o,el.children[0]); return o; })); });
 q.extend('before',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ o.parentElement.insertBefore(el,o); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ o.parentElement.insertBefore(el,o); return o; })); });
 q.extend('after',function(e){ e=q(e);
-    return this.sift(o=>e.map(el=>{ o.parentElement.insertBefore(el,o.nextSibling); return o; })); });
+    return this.sift(o=>q(e).map(el=>{ o.parentElement.insertBefore(el,o.nextSibling); return o; })); });
 
 
 q.extend('replaceWith',function(e){ if(!q.isQ(e)) e=q(e);
@@ -48,9 +48,12 @@ q.extend('hasAttr',function(e){
     return this.pipe(o=>q.tokenList(e).every(c=>o.hasAttribute(c))); });
 
 /* Getters and Setters */
-q.extend('css',function(e){
-    if (q.isString(e)) return this[0].style[q.toPropCase(e)];
-    if (e === undefined) return this[0].classList;
+q.extend('css',function(e, getcomputed){
+    if (q.isString(e)) {
+        return getcomputed ?
+            window.getComputedStyle(this[0]).getPropertyValue(q.toSnakeCase(e)) :
+            this[0].style[q.toPropCase(e)];
+    }
     return this.pipe(o=>q.setCSS(o,e)); });
 q.extend('attr',function(e){
     if (q.isString(e)) return this[0].getAttribute(e);
@@ -60,14 +63,11 @@ q.extend('data',function(e){
     if (q.isString(e) || e === undefined) return q.getData(this[0],e);
     return this.pipe(o=>q.setData(o,e)); });
 q.extend('val',function(e){
-    if (e === undefined) return this[0].value;
-    return this.pipe(o=>q.setVal(o,e)); });
+    return e === undefined ? this[0].value : this.pipe(o=>q.setVal(o,e)); });
 q.extend('html',function(...e){
-    if (e.length === 0) return this[0].innerHTML;
-    return this.pipe(o=>q.setHTML(o,...e)); });
+    return e.length === 0 ? this[0].innerHTML : this.pipe(o=>q.setHTML(o,...e)); });
 q.extend('text',function(...e){
-    if (e.length === 0) return this[0].innerText;
-    return this.pipe(o=>q.setText(o,...e)); });
+    return e.length === 0 ? this[0].innerText : this.pipe(o=>q.setText(o,...e)); });
 
 /* Properties */
 q.extend('rect',function(){
@@ -77,24 +77,23 @@ q.extend('classList',function(){
 q.extend('class',function(){
     return this[0].className; });
 q.extend('index',function(e){
-    if (e !== undefined) return this.toArray().indexOf(e);
+    if (e !== undefined) return this.toArray().indexOf(q.isQ(e) ? e[0] : e);
     return this.siblings().index(this[0]); });
 
 
 q.clear = function(o){ o.innerHTML = ""; return o; }
 
 q.setCSS = (o,e) => {
-    for (let i in e) { if (e.hasOwnProperty(i)) {
-        o.style[q.toPropCase(i)] = e[i]; } } return o; }
+    for (let i in e) { if (e.hasOwnProperty(i)) { o.style[q.toPropCase(i)] = e[i]; } } return o; }
 q.setAttr = (o,e) => {
-    for (let i in e) { if (e.hasOwnProperty(i)) {
-        o.setAttribute(i,e[i]); } } return o; }
+    for (let i in e) { if (e.hasOwnProperty(i)) { o.setAttribute(i,e[i]); } } return o; }
 q.setVal = (o,e) => { o.value = e; return o; }
-q.replaceWith = (o,e) => { o.replaceWith(e); return o; }
+q.setText = (o,...e) => { o.innerText = e.join(''); return o; }
 q.setHTML = (o,...e) => {
     o.innerHTML = ""; let s = q.settle(e);
     s.forEach(i=>o.append(q.isString(i)?q.htmlEncode(i):i));
     return o; }
+q.replaceWith = (o,e) => { o.replaceWith(e); return o; }
 
 q.tokenList = (s) =>
     q.isArray(s) ? e :
@@ -104,25 +103,24 @@ q.tokenList = (s) =>
 
 /* Cache methods for data manipulation */
 q.setCache = function(o,k,v) {
-    if (o.qcache === undefined) o.qcache = {};
-    if (k) o.qcache[k]=v; }
+    o.qcache ??= q.getData(o); if (k) o.qcache[k]=v; }
 q.setData = function(o,e) {
-    if (o.qcache === undefined) o.qcache = {};
-    Object.assign(o.qcache,e); return o; }
+    o.qcache ??= q.getData(o); Object.assign(o.qcache,e); return o; }
 q.getData = function(o,e) {
     if (o.qcache === undefined) {
         o.qcache = {};
-        for(let [k,v] of Object.entries(o.dataset))
-            q.setCache(o,k,q.parse(v));
+        for(let [k,v] of Object.entries(o.dataset)) q.setCache(o,k,q.parse(v));
     }
     if (o.dataset[e] !== undefined && o.qcache[e] !== o.dataset[e])
         q.setCache(o,e,q.parse(o.dataset[e]));
-    return e===undefined?o.qcache:o.qcache[e]; }
+    return e===undefined ? o.qcache : o.qcache[e]; }
 
 
 /* Turn css dash case properties to Camelcase */
 q.toPropCase = function(e) {
     return e.replace(/\-([a-z])/g,(m,p)=>p.toUpperCase()); }
+q.toSnakeCase = function(e) {
+    return e.replace(/[A-Z]/g,(m)=>'-'+m.toLowerCase()); }
 
 
 })();

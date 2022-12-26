@@ -131,7 +131,7 @@ if(w.q && w.document) {
             throw(e);
         }
     };
-    const init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
+    const init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = '.app'}) => {
         q(w.document).on(PAGELOAD, async ({detail:{nextPage,prevPage}}) => {
             try {
                 const [page,data] = make(routes, defaultPage);
@@ -146,13 +146,13 @@ if(w.q && w.document) {
                     selector,
                     data: e,
                 });
-                throw("Page failed: "+ e);
+                throw('Page failed: '+ e);
             }
         });
     };
     q(()=>{
-        q(w.document).delegate("click", "a", function(e){
-            if (route.style === HASH && this.href[0] === '#') {
+        q(w.document).on('click', 'a', function(e){
+            if (route.style === HASH && this.href[0] === POUND) {
                 e.preventDefault();
                 const r = this.attributes.href.value.slice(1);
                 if (r !== EMPTY) navigate(r);
@@ -174,10 +174,10 @@ if(w.q && w.document) {
 else w.route = route;
 
 
-w.addEventListener("load",()=>{
-    setTimeout(()=>w.addEventListener("popstate", o=>setActive(o.state)), 0);
+w.addEventListener('load',()=>{
+    setTimeout(()=>w.addEventListener('popstate', o=>setActive(o.state)), 0);
 });
-w.addEventListener("DOMContentLoaded", e=>setActive(null));
+w.addEventListener('DOMContentLoaded', e=>setActive(null));
 
 
 })(window);
