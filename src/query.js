@@ -53,7 +53,7 @@ const isJson = (s) => {
     return typeOf(s,"object") && s !== null;
 }
 const parse = (d) => { try { return JSON.parse(d); } catch(e) { console.error(e); return d; } }
-const matching = (s) => (o) => { try { return !s || o.matches(s); } catch(e) { return false; } }
+const matching = (s) => (o) => { try { return !s || unQ(o).matches(s); } catch(e) { return false; } }
 
 
 const asArray = (d) => isArray(d) ? d : [d];
@@ -93,8 +93,12 @@ const identify = (selector, selectioncontext) => {
     isElement(selector) || selector === selectioncontext ? [selector] :
     isFragment(selector) ? makeFragment(selector) :
     isArray(selector) ? settle(selector) :
-    isFunction(selector) ? !window.addEventListener('DOMContentLoaded',selector) :
+    isFunction(selector) ? !contentLoaded(selector) :
     selectioncontext.querySelectorAll(selector);
+}
+const contentLoaded = (fn) => {
+    if (window.document.readyState !== "loading") window.addEventListener('DOMContentLoaded',fn);
+    else fn();
 }
 
 const debug = (s,sc,nl) => {

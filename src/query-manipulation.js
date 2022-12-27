@@ -73,10 +73,6 @@ function text(...e){
 /* Properties */
 function rect(){
     return this[0].getBoundingClientRect(); }
-function classList(){
-    return [...this[0].classList]; }
-function className(){
-    return this[0].className; }
 function index(e){
     if (e !== undefined) return this.toArray().indexOf(unQ(e));
     return this.siblings().index(this[0]); }
@@ -150,8 +146,6 @@ Object.entries({
     html,
     text,
     rect,
-    classList,
-    className,
     index
 }).forEach(([k,v])=>{extend(k,v)})
 Object.assign(q,{
