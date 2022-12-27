@@ -1,66 +1,74 @@
 ;(()=>{
 if(!q) throw "qjs not imported yet";
 
+const {asArray,isJson} = q;
 
-q.catchJson = async d => {
+const catchJson = async d => {
    let r = await d.text();
-   return q.isJson(r) ?
+   return isJson(r) ?
       Promise.resolve(JSON.parse(r)) :
       Promise.reject({error:'JSON Malformed',data:r}); }
 
 
-q.promiseList = (t) => (l,f=d=>d) => 
-   l.map((...u) => pd => t(...u).then(d => pd.concat([f(d)])));
-q.promiseEach = (l) => 
-   l.reduce((r,f) => {
-      if(Array.isArray(f)) {
-         let [fulfill=()=>{}, reject=()=>{}] = f;
-         return r.then(fulfill, reject);
-      } else return r.then(f);
+const promiseList = (type) => (list, fn=data=>data) => 
+   list.map((...args) => pipeddata =>
+      type(...args).then(data => pipeddata.concat([fn(data)])));
+const promiseEach = (list) => 
+   list.reduce((accumulator, callback) => {
+      if(Array.isArray(callback)) {
+         let [fulfill=()=>{}, reject=()=>{}] = callback;
+         return accumulator.then(fulfill, reject);
+      } else return accumulator.then(callback);
    }, Promise.resolve([]));
 
 
+const get = (url, o) => fetch(url, o).then(catchJson);
+const getAll = list => Promise.all(list.map(o => get(...asArray(o))));
+const getList = promiseList(get);
+const getEach = list => promiseEach(getList(list));
 
-q.get = (d, o={}) => fetch(d,o).then(q.catchJson);
-q.getAll = d => Promise.all(d.map(o => q.get(...q.asArray(o))));
-q.getList = q.promiseList(q.get);
-q.getEach = l => q.promiseEach(q.getList(l));
-
-
-    
-q.post = (u, o={}) =>
-   fetch(u, {
-      headers:{ 'Content-Type': 'application/json' },
-      method: 'POST',
-      body: JSON.stringify(o),
-   }).then(q.catchJson);
-q.postAll = d => Promise.all(d.map(o => q.post(...q.asArray(o))));
-q.postList = q.promiseList(q.post);
-q.postEach = l => q.promiseEach(q.postList(l));
+const POST = {method:'POST'};
+const post = (url, o) => fetch(url, {...POST, body: JSON.stringify(o)}).then(catchJson);
+const postAll = list => Promise.all(list.map(o => post(...asArray(o))));
+const postList = promiseList(post);
+const postEach = list => promiseEach(postList(list));
 
 
-
-q.toFormData = d => Object.entries(d)
-   .reduce((r, [i,v])=>{ r.append(i,v); return r; }, new FormData);
-q.postForm = (u, o={}) =>
-   fetch(u, {
-      headers:{ 'Content-Type': 'application/json' },
-      method: 'POST',
-      body: q.toFormData(o),
-   }).then(q.catchJson);
-q.postFormAll = d => Promise.all(d.map(o => q.postForm(...q.asArray(o))));
-q.postFormList = q.promiseList(q.postForm);
-q.postFormEach = l => q.promiseEach(q.postFormList(l));
+const toFormData = (d={}) => Object.entries(d)
+   .reduce((r, [k,v])=>{ r.append(k,v); return r; }, new FormData);
+const postForm = (url, o) => fetch(url, {...POST, body: toFormData(o)}).then(catchJson);
+const postFormAll = list => Promise.all(list.map(o => postForm(...asArray(o))));
+const postFormList = promiseList(postForm);
+const postFormEach = list => promiseEach(postFormList(list));
 
 
-
-q.getHTML = async (d) => {
-   q.getHTML.files ??= {};
-   if (d.getHTML.files[d]) return q(d.getHTML.files[d]);
-   const file = await fetch(d).then(d=>d.text()).catch(()=>false);
-   if (file) d.getHTML.files[d] = file;
+const getHTML = async (url) => {
+   getHTML.files ??= {};
+   if (getHTML.files[url]) return q(getHTML.files[url]);
+   const file = await fetch(url).then(d=>d.text()).catch(()=>false);
+   if (file) getHTML.files[url] = file;
    return q(file);
 }
+
+Object.assign(q,{
+   catchJson,
+   promiseList,
+   promiseEach,
+   get,
+   getAll,
+   getList,
+   getEach,
+   post,
+   postAll,
+   postList,
+   postEach,
+   toFormData,
+   postForm,
+   postFormAll,
+   postFormList,
+   postFormEach,
+   getHTML
+});
 
 
 })();

@@ -1,7 +1,7 @@
 import { Card, Container } from "./Elements.js";
 import { Nav, NavLink } from "./Navs.js";
 
-const nav = () => {
+const demonav = () => {
     return Nav(
         NavLink('/','Main Page'),
         NavLink('/page/1','Page 1'),
@@ -15,7 +15,7 @@ const nav = () => {
 export const MainPage = async () => {
     window.document.title = "QJS: default page example";
     return Container(
-        nav(),
+        demonav(),
         Card(`
             <p>This is the default page. It is the page if none of your other routes are matched.</p>
             <p>QJS has a lot of basic options for PWAs that should allow a motivated developer to create something robust but live. Not needing to compile means development can be swift. Luckily most of the work done in this environment can easily be ported over to any more complex javascript frameworks, but I find I often like to simply write code and move.</p>
@@ -26,7 +26,7 @@ export const MainPage = async () => {
 export const BasicPage = async ({route}) => {
     window.document.title = "QJS: data page example";
     return Container(
-        nav(),
+        demonav(),
         Card(`This is a page that is routed from anything with the 'page' route. It is passed extra information, which in this case was '${route}'.`)
     );
 }
@@ -34,7 +34,7 @@ export const BasicPage = async ({route}) => {
 export const ErrorPage = async (error) => {
     window.document.title = "QJS: error page example";
     return Container(
-        nav(),
+        demonav(),
         Card("This is the error page. Errors can be automatically routed to an appropriate design or default page.",
         `<div>The error thrown was: '${error}'</div>`)
     );
@@ -42,20 +42,18 @@ export const ErrorPage = async (error) => {
 
 export const LoadedPage = async () => {
     /* Fetch am html fragment document and cache it into the page function */
-    LoadedPage.htm ??= q(await fetch('./demo/loaded.htm').then(d=>d.text()));
+    let page = await q.getHTML('./demo/loaded.htm');
 
     /* Pull a title element out of a fragment, and use it each time this page is rendered */
-    if (LoadedPage.title === undefined) {
-        const title = LoadedPage.htm.matching('title');
-        LoadedPage.title = title.length ? title.text() : false;
-        LoadedPage.htm = LoadedPage.htm.notMatching('title');
-    }
+    const title = page.matching('title');
+    LoadedPage.title = title.length ? title.text() : false;
+    page = page.notMatching('title');
+        
     if (LoadedPage.title) window.document.title = LoadedPage.title;
     
-    
     return Container(
-        nav(),
-        LoadedPage.htm
+        demonav(),
+        page
     );
 }
 

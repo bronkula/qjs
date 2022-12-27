@@ -1,45 +1,61 @@
 ;(()=>{
 if(!q) throw "qjs not imported yet";
 
+const {matching:match,extend} = q;
+
 /* See if any Q elements match a selector */
-q.extend('is',function(s){ return this.some(q.matching(s)); });
-q.extend('not',function(s){ return !this.is(s); });
-
-/* Traversal methods */
-q.extend('next',function(s){
-    return this.sift(o=>[o.nextElementSibling].filter(q.matching(s))); });
-q.extend('prev',function(s){
-    return this.sift(o=>[o.previousElementSibling].filter(q.matching(s))); });
-q.extend('parent',function(s){
-    return this.sift(o=>[o.parentElement].filter(q.matching(s))); });
-
-/* Return one element from current selection */
-q.extend('last',function(s){
-    return q([this[this.length-1]].filter(q.matching(s))); });
-q.extend('first',function(s){
-    return q([this[0]].filter(q.matching(s))); });
-
-/* Search down */
-q.extend('find',function(s){
-    return this.sift(o=>q(s,o)); });
-/* Search up */
-q.extend('closest',function(s){
-    return this.sift(o=>o.closest(s)); });
-/* Search immediate children */
-q.extend('children',function(s){
-    return this.sift(o=>[...o.children].filter(q.matching(s))); });
-/* Search through siblings */
-q.extend('siblings',function(s){
-    return this.sift(o=>[...o.parentElement.children].filter(a=>a !== o && q.matching(s)(a))); });
+function is(s) { return this.some(q.matching(s)); }
+function not(s) { return !this.is(s); }
 
 /* Filter matching elements from current list */
-q.extend('matching',function(s){
-    return q(this.filter(q.matching(s))); });
-q.extend('notMatching',function(s){
-    return q(this.filter(o=>!q.matching(s)(o))); });
+function matching(s) { return q(this.filter(match(s))); }
+function notMatching(s) { return q(this.filter(o=>!match(s)(o))); }
+
+/* Traversal methods */
+function next(s) {
+    return this.sift(o=>[o.nextElementSibling].filter(match(s))); }
+function prev(s) {
+    return this.sift(o=>[o.previousElementSibling].filter(match(s))); }
+function parent(s) {
+    return this.sift(o=>[o.parentElement].filter(match(s))); }
+
+/* Return one element from current selection */
+function last(s) {
+    return q([this[this.length-1]].filter(match(s))); }
+function first(s) {
+    return q([this[0]].filter(match(s))); }
+
+/* Search down */
+function find(s) {
+    return this.sift(o=>q(s,o)); }
+/* Search up */
+function closest(s) {
+    return this.sift(o=>o.closest(s)); }
+/* Search immediate children */
+function children(s) {
+    return this.sift(o=>[...o.children].filter(match(s))); }
+/* Search through siblings */
+function siblings(s) {
+    return this.sift(o=>[...o.parentElement.children].filter(a=>a !== o && match(s)(a))); }
 
 /* Select element by index and return QJS object */
-q.extend('item',function(e){
-    return q(this[e]); });
+function item(e){ return q(this[e]); }
+
+Object.entries({
+    is,
+    not,
+    next,
+    prev,
+    parent,
+    last,
+    first,
+    find,
+    closest,
+    children,
+    siblings,
+    matching,
+    notMatching,
+    item
+}).forEach(([k,v])=>{extend(k,v)})
 
 })();
