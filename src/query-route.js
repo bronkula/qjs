@@ -3,19 +3,21 @@
 const stateObj = {};
 
 const route = {
-    root : '/',
-    style : 'hash',
-    navigate : (str,updateUrl=true) => {
+    root: '/',
+    style: 'hash',
+    navigate: (str, updateUrl=true) => {
         if(str=="back") {
             if(w.history.state != null) w.history.back();
         }
         else if (w.history.pushState) {
-            setActive({
-                title: str,
-                url: route.style === 'hash' ? w.location.origin + w.location.pathname + "#" + str :
-                    route.style === 'browser' ? w.location.origin + route.root + (str !== route.root ? str : '') :
-                    ''
-            },updateUrl);
+            const title = str;
+            const extension = str !== route.root ? str.replace(/^\//,'') : '';
+            const url =
+                route.style === 'hash' ? w.location.origin + w.location.pathname + "#" + str :
+                route.style === 'browser' ? w.location.origin + route.root + extension :
+                ''
+            console.log({title,url})
+            setActive({ title, url }, updateUrl);
         } else {
             w.location.assign(stateObj.url);
         }
@@ -25,19 +27,19 @@ const route = {
         let props = {};
         for(let i in basis) {
             if (basis[i] == tocheck[i]) continue;
+            else if (tocheck[i] === undefined) return false;
             else if (tocheck[i].slice(0,1) == ":") props[tocheck[i].slice(1)] = basis[i];
             else if (basis[i] != tocheck[i]) return false;
         }
         return props;
     },
-    getroot: (basis) => {
-        return basis ?? 
-            route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
+    getroot: () => {
+        return route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
             route.style === 'hash' ? w.location.hash.slice(1) :
             '';
     },
     make: (routes,page=()=>{},basis) => {
-        let hashroute = route.getroot(basis);
+        let hashroute = basis ?? route.getroot();
         let hashsplit = hashroute.split("/");
         let props = {};
         if(hashroute != '') {
