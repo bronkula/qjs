@@ -1,5 +1,5 @@
 import { Card, Container } from "./Elements.js";
-import { NavLink } from "./Navs.js";
+import { Nav, NavLink } from "./Navs.js";
 
 const demonav = () => {
     return Nav(
