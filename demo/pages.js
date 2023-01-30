@@ -1,6 +1,20 @@
 import { Card, Container } from "./Elements.js";
 import { NavBar, NavPills, NavLink } from "./Navs.js";
 
+<<<<<<< HEAD
+=======
+const CoreNav = () => {
+    return NavBar(
+        Container(
+            NavPills(
+                NavLink({link:'/',label:'QJS'}),
+                NavLink({link:'load',label:'Documentation'}),
+            )
+        )
+    ).css({'margin-bottom':'1em'});
+}
+
+>>>>>>> ffab03f9cf1d342020b9aa038269166cfb543dfa
 const demonav = () => {
     return Nav(
         NavLink('/','Main Page'),
