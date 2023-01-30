@@ -1,145 +1,183 @@
 ;((w)=>{
 
-const stateObj = {};
+const PAGEBEFORESHOW = 'pagebeforeshow';
+const PAGESHOW = 'pageshow';
+const PAGELOAD = 'pageload';
+const PAGEFAIL = 'pagefail';
+const HASH = 'hash';
+const BROWSER = 'browser';
+const BACK = 'back';
+const LINK = 'link';
+const SLASH = '/';
+const COLON = ':';
+const POUND = '#';
+const EMPTY = '';
 
-const route = {
-    root: '/',
-    style: 'hash',
-    navigate: (str, updateUrl=true) => {
-        if(str=="back") {
-            if(w.history.state != null) w.history.back();
-        }
-        else if (w.history.pushState) {
-            const title = str;
-            const extension = str !== route.root ? str.replace(/^\//,'') : '';
-            const url =
-                route.style === 'hash' ? w.location.origin + w.location.pathname + "#" + str :
-                route.style === 'browser' ? w.location.origin + route.root + extension :
-                ''
-            console.log({title,url})
-            setActive({ title, url }, updateUrl);
-        } else {
-            w.location.assign(stateObj.url);
-        }
-    },
-    matches: (basis, tocheck) => {
-        if (basis[0] != tocheck[0]) return false;
-        let props = {};
-        for(let i in basis) {
-            if (basis[i] == tocheck[i]) continue;
-            else if (tocheck[i] === undefined) return false;
-            else if (tocheck[i].slice(0,1) == ":") props[tocheck[i].slice(1)] = basis[i];
-            else if (basis[i] != tocheck[i]) return false;
-        }
-        return props;
-    },
-    getroot: () => {
-        return route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
-            route.style === 'hash' ? w.location.hash.slice(1) :
-            '';
-    },
-    make: (routes,page=()=>{},basis) => {
-        let hashroute = basis ?? route.getroot();
-        let hashsplit = hashroute.split("/");
-        let props = {};
-        if(hashroute != '') {
-            for(let [checkroute,fn] of Object.entries(routes)) {
-                props = {};
-                if (checkroute==hashroute) { page = fn; break; }
-                let checksplit = checkroute.split("/");
-                if(checksplit[0]==hashsplit[0] && checksplit.length==hashsplit.length) {
-                    props = route.matches(hashsplit,checksplit);
-                    if (props!==false) { page = fn; break; }
-                }
+const state = {};
+const prev = {};
+const next = {};
+const root = SLASH;
+const style = BROWSER;
+
+
+const navigate = (str, updateUrl = true) => {
+    let path = makepath(str);
+
+    if (str === BACK || path.fullroute === prev.fullroute && prev.fullroute !== next.fullroute) {
+        if(w.history.state !== null) w.history.back();
+    } else if (w.history.pushState) {
+        setActive(makestate(path.fullroute, path.href), updateUrl);
+    } else {
+        w.location.assign(state.url);
+        return;
+    }
+};
+const matches = (basis, tocheck) => {
+    if (tocheck[0] === EMPTY && tocheck.length > 0) tocheck.shift();
+    if (basis[0] !== tocheck[0] && tocheck[0].slice(0,1) !== COLON) return false;
+    let props = {};
+    for(let i in basis) {
+        if (basis[i] === tocheck[i]) continue;
+        else if (tocheck[i].slice(0,1) === COLON) props[tocheck[i].slice(1)] = basis[i];
+        else if (basis[i] !== tocheck[i]) return false;
+    }
+    return props;
+};
+const make = (routes = {}, page = ()=>{}, basis) => {
+    const thisroute = basis ? makepath(basis) : next;
+    let props = {};
+    if(thisroute.route !== EMPTY) {
+        for(let [checkroute,fn] of Object.entries(routes)) {
+            props = {};
+            let path = makepath(checkroute);
+            if (path.route === thisroute.route) { page = fn; break; }
+            if(path.path[0] === thisroute.path[0] && path.path.length === thisroute.path.length) {
+                props = matches(thisroute.path, path.path);
+                if (props!==false) { page = fn; break; }
             }
         }
-        return (data)=>page(props,data);
-    },
+    }
+    return [page,props];
+};
+const makepath = (str) => {
+    const rooted = remroot(str);
+    const [root,hash] = rooted.split(POUND);
+    return {
+        fullroute: rooted,
+        route: root,
+        href: w.location.origin + route.root + rooted,
+        hash: hash ? POUND + hash : EMPTY,
+        path: root.split(SLASH),
+    };
+}
+const emptyobject = (obj) => Object.keys.forEach(k=>{ if (obj.hasOwn(k)) delete obj[k] });
+const roots = () => ([route.root, SLASH]);
+const rootregexp = () => new RegExp(`^(${roots().join('|')})`);
+const remroot = (str) => str.replace(rootregexp(),EMPTY);
+const isroot = (str) => roots().includes(str);
+const hasroot = (str) => str.match(rootregexp());
+const makeevent = (name) => (state) => w.document.dispatchEvent(new CustomEvent(name, { detail: state }));
+const makestate = (title, url, id) => {
+    makestate.id = id ?? makestate.id !== undefined ? makestate.id + 1 : 0;
+    return { id:makestate.id, title, url };
+}
+
+const setActive = (givenstate, update) => {
+    const path = makepath(givenstate?.title ?? w.location.pathname + w.location.hash);
+    newstate = givenstate ?? makestate(path.fullroute, path.href);
+    if (givenstate) Object.assign(prev, next);
+    Object.assign(next, path);
+    w.history[update && prev.fullroute !== next.fullroute ? 'pushState' : 'replaceState'](newstate, newstate.title, newstate.url);
+    events.pageload({ nextPage: newstate, prevPage: state });
+    Object.assign(state,newstate);
 };
 
-const setActive = (state,update) => {
+const events = {
+    pageload: makeevent(PAGELOAD),
+    pagebeforeshow: makeevent(PAGEBEFORESHOW),
+    pageshow: makeevent(PAGESHOW),
+    pagefail: makeevent(PAGEFAIL),
+};
 
-    if(state==null) {
-        state = {
-            title: 
-                route.style === 'hash' ? w.location.hash.slice(1) :
-                route.style === 'browser' ? w.location.pathname.slice(route.root.length) :
-                '',
-            url:w.location.href
-        };
-    }
-    
-    stateObj.state = {...state};
-    
-    w.history[update?'pushState':'replaceState']
-        (state, state.title, state.url);
-
-    w.document.dispatchEvent(
-        new CustomEvent("pageshow",{
-            detail:{
-                nextPage:{...state},
-                prevPage:{...stateObj.state}
-            }
-        })
-    );
-
+const route = {
+    state,
+    root,
+    style,
+    prev,
+    next,
+    navigate,
+    matches,
+    makepath,
+    roots,
+    rootregexp,
+    remroot,
+    isroot,
+    hasroot,
+    make,
+    makestate,
+    makeevent,
+    events,
 };
 
 if(w.q && w.document) {
-    route.makepage = async ({page,data,selector=''}) => {
+    const makepage = async ({page, data, selector=EMPTY}) => {
         try {
-            let d = await page(data);
-            q(selector).html(d);
+            events.pagebeforeshow({next, data, selector});
+            let qp = q(await page(data));
+            q(selector).html(qp);
+            events.pageshow({nextPage: qp, data, selector});
         } catch(e) {
+            events.pagefail({page, data, selector});
             throw(e);
         }
-    },
-    route.init = ({routes = {}, defaultPage = ()=>``, errorPage = e=>`Error: ${e}`, selector = ".app"}) => {
-        q(w.document).on("pageshow",async (event)=>{
+    };
+    const init = ({routes = {}, defaultPage = ()=>EMPTY, errorPage = e=>`Error: ${e}`, selector = '.app'}) => {
+        q(w.document).on(PAGELOAD, async ({detail:{nextPage,prevPage}}) => {
             try {
-                const page = route.make(routes, defaultPage);
+                const [page,data] = make(routes, defaultPage);
                 await route.makepage({
                     page,
                     selector,
+                    data
                 });
             } catch(e) {
                 route.makepage({
                     page: errorPage,
                     selector,
-                    data: e
+                    data: e,
                 });
-                throw("Page failed: "+ e);
+                throw('Page failed: '+ e);
             }
         });
     };
     q(()=>{
-        q(w.document).delegate("click","a",function(e){
-            if (route.style === 'hash' && this.href[0] === '#') {
+        q(w.document).on('click', 'a', function(e){
+            if (route.style === HASH && this.href[0] === POUND) {
                 e.preventDefault();
-                let r = this.attributes.href.value.slice(1);
-                if(r !== "") route.navigate(r);
+                const r = this.attributes.href.value.slice(1);
+                if (r !== EMPTY) navigate(r);
             } else
-            if (route.style === 'browser' && this.dataset.role === 'link') {
+            if (route.style === BROWSER && this.dataset.role === LINK) {
                 e.preventDefault();
-                let r = this.attributes.href;
-                if(r !== "") route.navigate(r.value);
+                const r = this.attributes.href;
+                if (r !== EMPTY) navigate(r.value);
             } else
-            if (route.style === 'browser' && this.dataset.rel === 'back') {
+            if (route.style === BROWSER && this.dataset.rel === BACK) {
                 e.preventDefault();
-                route.navigate('back');
+                navigate(BACK);
             }
-            e.preventDefault();
         });
     });
+    Object.assign(route, { makepage, init });
     q.route = route;
 }
 else w.route = route;
 
 
-w.addEventListener("load",()=>{
-    setTimeout(()=>w.addEventListener("popstate",o=>setActive(o.state)),0);
+w.addEventListener('load',()=>{
+    setTimeout(()=>w.addEventListener('popstate', o=>setActive(o.state)), 0);
 });
-w.addEventListener("DOMContentLoaded",e=>{setActive(null);});
+w.addEventListener('DOMContentLoaded', e=>setActive(null));
 
 
 })(window);
