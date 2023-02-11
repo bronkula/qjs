@@ -2,17 +2,16 @@
 if(!q) throw "qjs not imported yet";
 
 const {asArray,isArray,isJson} = q;
-const {resolve,reject,all} = Promise;
 
 const catchJson = async d => {
    let r = await d.text();
    return isJson(r) ?
-      resolve(JSON.parse(r)) :
-      reject({error:'JSON Malformed',data:r}); }
+      Promise.resolve(JSON.parse(r)) :
+      Promise.reject({error:'JSON Malformed',data:r}); }
 
 
 const promiseAll = (promisetype) => (list) =>
-   all(list.map((o) => promisetype(...asArray(o))))
+   Promise.all(list.map((o) => promisetype(...asArray(o))))
 const promiseList = (promisetype) => (list, fn=d=>d) => 
    list.map((url) =>
       (pipeddata) => promisetype(...asArray(url)).then((data) =>
@@ -25,7 +24,7 @@ const promiseEach = (functionlist) =>
          const [resolve=()=>{}, reject=()=>{}] = callback;
          return accumulator.then(resolve, reject);
       } else return accumulator.then(callback);
-   }, resolve([]));
+   }, Promise.resolve([]));
 
 const get = (url, o) => fetch(url, o).then(catchJson);
 const getAll = promiseAll(get)

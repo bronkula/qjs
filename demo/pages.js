@@ -42,7 +42,7 @@ export const ErrorPage = async (error) => {
 
 export const LoadedPage = async () => {
     /* Fetch am html fragment document and cache it into the page function */
-    let page = await q.getHTML('./demo/loaded.htm');
+    let page = await q.getHTML('./demo/pages/loaded.htm');
 
     /* Pull a title element out of a fragment, and use it each time this page is rendered */
     const title = page.matching('title');
@@ -58,7 +58,7 @@ export const LoadedPage = async () => {
 }
 
 export const DownloadPage = async () => {
-    DownloadPage.package ??= await q.get('package.json');
+    DownloadPage.package ??= (await q.get('package.json')) ?? {};
     return Container(
         Card(`
             <h2 id="getting-started">Getting Started</h2>
