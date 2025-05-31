@@ -10,6 +10,10 @@ But here we are. This library is small, and meant for me. I made it for myself, 
 
 Who needs this library? Anyone who likes to make websites on an old AMP stack, and hates having to compile a website. If you like making websites, but wish you could just make code and upload it, this might be for you.
 
+### Docs
+
+- [Documentation](http://hdraws.com/qjs/docs)
+
 ### Current Release
 
 **v 1.2.2**
